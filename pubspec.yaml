@@ -1,0 +1,46 @@
+name: grani57_app
+description: "Production foundation for the 57 ГРАНЕЙ mobile app."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_svg: ^2.3.0
+  shared_preferences: ^2.5.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/icons/actions/
+    - assets/icons/brand/
+    - assets/icons/content/
+    - assets/icons/forms/
+    - assets/icons/navigation/
+    - assets/icons/profile/
+    - assets/icons/status/
+    - assets/images/brand/
+    - assets/images/doctors/
+    - assets/images/maps/
+    - assets/images/publications/
+
+  fonts:
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Manrope-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Manrope-SemiBold.ttf
+          weight: 600
