@@ -33,7 +33,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Вход'), findsOneWidget);
+    expect(find.text('Вход и регистрация'), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsNothing);
     expect(
       find.text('You have pushed the button this many times:'),
@@ -85,7 +85,7 @@ void main() {
   testWidgets('no session routes to patient login screen', (tester) async {
     await _pumpStartupWithSession(tester, const DemoSession.unauthenticated());
 
-    expect(find.text('Вход'), findsOneWidget);
+    expect(find.text('Вход и регистрация'), findsOneWidget);
   });
 
   testWidgets('patient session routes to patient shell placeholder', (
@@ -149,7 +149,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Вход'), findsOneWidget);
+    expect(find.text('Вход и регистрация'), findsOneWidget);
     expect(preferences.getBool('demo_session.is_authenticated'), isNull);
     expect(preferences.getString('demo_session.user_id'), isNull);
     expect(preferences.getString('demo_session.role'), isNull);
@@ -223,8 +223,8 @@ void main() {
   testWidgets('Patient Login renders', (tester) async {
     await _pumpPatientLogin(tester);
 
-    expect(find.text('Вход'), findsOneWidget);
-    expect(find.text('Телефон'), findsOneWidget);
+    expect(find.text('Вход и регистрация'), findsOneWidget);
+    expect(find.text('Номер телефона'), findsOneWidget);
     expect(find.text('Получить код'), findsOneWidget);
     expect(find.text('Вход для сотрудников'), findsOneWidget);
   });
@@ -254,7 +254,7 @@ void main() {
   testWidgets('known patient opens SMS screen', (tester) async {
     await _openSmsForPhone(tester, '+7 999 000-00-01');
 
-    expect(find.text('Код подтверждения'), findsOneWidget);
+    expect(find.text('Подтверждение номера'), findsOneWidget);
     expect(find.textContaining('+7 999 000-00-01'), findsOneWidget);
   });
 
@@ -270,7 +270,7 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text('Код подтверждения'), findsNothing);
+    expect(find.text('Подтверждение номера'), findsNothing);
   });
 
   testWidgets('correct SMS patient_001 saves session and routes to shell', (
@@ -326,7 +326,7 @@ void main() {
     await _submitSms(tester, '000000');
 
     expect(find.text('Неверный код подтверждения'), findsOneWidget);
-    expect(find.text('Код подтверждения'), findsOneWidget);
+    expect(find.text('Подтверждение номера'), findsOneWidget);
     expect(preferences.getBool('demo_session.is_authenticated'), isNull);
   });
 
@@ -336,8 +336,8 @@ void main() {
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
 
-    expect(find.text('Вход'), findsOneWidget);
-    expect(find.text('Код подтверждения'), findsNothing);
+    expect(find.text('Вход и регистрация'), findsOneWidget);
+    expect(find.text('Подтверждение номера'), findsNothing);
   });
 
   testWidgets('Back after successful authentication does not return to auth', (
@@ -354,6 +354,7 @@ void main() {
   testWidgets('employee link opens EmployeeAuthPlaceholder', (tester) async {
     await _pumpPatientLogin(tester);
 
+    await tester.ensureVisible(find.text('Вход для сотрудников'));
     await tester.tap(find.text('Вход для сотрудников'));
     await tester.pumpAndSettle();
 
@@ -373,7 +374,7 @@ void main() {
     );
 
     expect(find.text('Patient shell'), findsOneWidget);
-    expect(find.text('Вход'), findsNothing);
+    expect(find.text('Вход и регистрация'), findsNothing);
   });
 
   test('SMS validation accepts registered demo code', () {
@@ -579,7 +580,7 @@ Future<void> _openSmsForPhone(
 
 Future<void> _submitSms(WidgetTester tester, String code) async {
   await tester.enterText(find.byType(TextField).last, code);
-  await tester.tap(find.text('Войти'));
+  await tester.tap(find.text('Продолжить'));
   await tester.pumpAndSettle();
 }
 

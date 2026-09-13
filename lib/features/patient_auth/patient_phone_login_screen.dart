@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../core/design_system/components/app_button.dart';
-import '../../core/design_system/components/app_text_field.dart';
+import '../../core/design_system/gradients/app_gradients.dart';
 import '../../core/design_system/tokens/app_colors.dart';
+import '../../core/design_system/tokens/app_radii.dart';
 import '../../core/design_system/tokens/app_spacing.dart';
 import '../../core/design_system/typography/app_typography.dart';
 import '../../core/mock_runtime/demo_auth_service.dart';
 import '../../core/mock_runtime/demo_session_store.dart';
-import '../development_demo/employee_auth_placeholder.dart';
 import '../../mock_data/demo_asset_paths.dart';
+import '../development_demo/employee_auth_placeholder.dart';
 import 'patient_sms_code_screen.dart';
 import 'russian_phone_input_formatter.dart';
 
@@ -31,7 +31,7 @@ class PatientPhoneLoginScreen extends StatefulWidget {
 class _PatientPhoneLoginScreenState extends State<PatientPhoneLoginScreen> {
   late final DemoAuthService _authService;
   late final DemoSessionStore _sessionStore;
-  final _phoneController = TextEditingController(text: '+7 ');
+  final _phoneController = TextEditingController();
   bool _isSubmitting = false;
   String? _phoneError;
   bool _showUnknownPatientState = false;
@@ -55,8 +55,8 @@ class _PatientPhoneLoginScreenState extends State<PatientPhoneLoginScreen> {
     }
 
     FocusScope.of(context).unfocus();
-    final normalizedPhone = normalizeRussianPhone(_phoneController.text);
-    if (normalizedPhone.length != 11 || !normalizedPhone.startsWith('7')) {
+    final localDigits = _phoneController.text.replaceAll(RegExp(r'\D'), '');
+    if (localDigits.length != 10) {
       setState(() {
         _phoneError = 'Введите номер телефона';
         _showUnknownPatientState = false;
@@ -70,7 +70,8 @@ class _PatientPhoneLoginScreenState extends State<PatientPhoneLoginScreen> {
       _showUnknownPatientState = false;
     });
 
-    final lookup = _authService.lookupPatientByPhone(_phoneController.text);
+    final phone = '+7 ${_phoneController.text}';
+    final lookup = _authService.lookupPatientByPhone(phone);
     if (!lookup.isRegistered || lookup.patient == null) {
       setState(() {
         _isSubmitting = false;
@@ -83,7 +84,7 @@ class _PatientPhoneLoginScreenState extends State<PatientPhoneLoginScreen> {
         .push(
           MaterialPageRoute<void>(
             builder: (_) => PatientSmsCodeScreen(
-              phone: _phoneController.text,
+              phone: phone,
               patientId: lookup.patient!.id,
               authService: _authService,
               sessionStore: _sessionStore,
@@ -105,55 +106,61 @@ class _PatientPhoneLoginScreenState extends State<PatientPhoneLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final statusHeight = MediaQuery.paddingOf(context).top;
+    final contentHeight =
+        MediaQuery.sizeOf(context).height -
+        statusHeight -
+        _AuthFigma.headerHeight;
+
     return Scaffold(
-      backgroundColor: AppColors.surface,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
+      backgroundColor: AppColors.background,
+      body: Column(
+        children: [
+          SizedBox(height: statusHeight),
+          _AuthHeader(
+            title: 'Вход и регистрация',
+            onBack: Navigator.of(context).canPop()
+                ? () => Navigator.of(context).pop()
+                : null,
+          ),
+          SizedBox(
+            height: contentHeight,
+            child: SingleChildScrollView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.pagePadding,
-                vertical: AppSpacing.x24,
-              ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: AppSpacing.x24),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: SvgPicture.asset(
                         DemoAssetPaths.logoPrimary,
                         width: 140,
-                        height: 41,
+                        height: 40.13,
                       ),
                     ),
-                    const SizedBox(height: 72),
-                    Text(
-                      'Вход',
-                      style: AppTypography.title.copyWith(
-                        color: AppColors.text,
+                    const SizedBox(height: 16),
+                    const SizedBox(
+                      height: 72,
+                      child: _GradientHeadline(
+                        'Сохраняя здоровье\nВаших зубов.',
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.x12),
-                    Text(
-                      'Введите номер телефона, чтобы получить код подтверждения',
-                      style: AppTypography.body.copyWith(
-                        color: AppColors.secondary,
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 40,
+                      child: Text(
+                        'Войдите или создайте аккаунт\nпо номеру телефона.',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: _AuthFigma.secondaryText,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.x32),
-                    AppTextField(
-                      label: 'Телефон',
+                    const SizedBox(height: 16),
+                    _FigmaPhoneField(
                       controller: _phoneController,
-                      hintText: '+7 999 000-00-01',
                       errorText: _phoneError,
-                      keyboardType: TextInputType.phone,
-                      textInputAction: TextInputAction.done,
-                      autofillHints: const [AutofillHints.telephoneNumber],
-                      inputFormatters: [RussianPhoneInputFormatter()],
                       onChanged: (_) {
                         if (_phoneError != null || _showUnknownPatientState) {
                           setState(() {
@@ -173,38 +180,312 @@ class _PatientPhoneLoginScreenState extends State<PatientPhoneLoginScreen> {
                         ),
                       ),
                     ],
-                    const SizedBox(height: AppSpacing.x20),
-                    AppButton(
+                    const SizedBox(height: 16),
+                    const _ConsentRow(),
+                    const SizedBox(height: 16),
+                    _FigmaButton(
                       label: 'Получить код',
-                      semanticLabel: 'Получить код подтверждения',
-                      isLoading: _isSubmitting,
+                      backgroundColor: AppColors.soft,
+                      textColor: AppColors.secondary,
                       onPressed: _isSubmitting ? null : _submitPhone,
                     ),
-                    const SizedBox(height: AppSpacing.x16),
-                    TextButton(
-                      onPressed: _openEmployeePlaceholder,
-                      child: Text(
-                        'Вход для сотрудников',
-                        style: AppTypography.label.copyWith(
-                          color: AppColors.brand,
-                        ),
-                      ),
+                    const SizedBox(height: 16),
+                    _FigmaButton(
+                      label: 'Контакты клиник',
+                      backgroundColor: AppColors.soft,
+                      textColor: AppColors.brand,
+                      onPressed: () {},
                     ),
-                    const SizedBox(height: 96),
-                    Text(
-                      'Development demo: вход доступен только для трёх зарегистрированных пациентов',
-                      textAlign: TextAlign.center,
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.secondary,
-                      ),
+                    const SizedBox(height: 16),
+                    _FigmaButton(
+                      label: 'Вход для сотрудников',
+                      backgroundColor: AppColors.surface,
+                      textColor: AppColors.brand,
+                      onPressed: _openEmployeePlaceholder,
                     ),
                   ],
                 ),
               ),
-            );
-          },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FigmaPhoneField extends StatelessWidget {
+  const _FigmaPhoneField({
+    required this.controller,
+    this.errorText,
+    this.onChanged,
+    this.onSubmitted,
+  });
+
+  final TextEditingController controller;
+  final String? errorText;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: errorText == null ? 112 : 132,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 20,
+            child: Text(
+              'Номер телефона',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: _AuthFigma.secondaryText,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            height: 56,
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: AppRadii.radius12,
+              border: Border.all(color: AppColors.border),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            alignment: Alignment.center,
+            child: Stack(
+              fit: StackFit.expand,
+              alignment: Alignment.centerLeft,
+              children: [
+                Positioned.fill(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: ValueListenableBuilder<TextEditingValue>(
+                      valueListenable: controller,
+                      builder: (context, value, _) {
+                        final localPhone = value.text.trim();
+                        final text = localPhone.isEmpty
+                            ? '+7 (921) 000-00-00'
+                            : '+7 $localPhone';
+                        return SizedBox(
+                          height: 24,
+                          child: Text(
+                            text,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: _AuthFigma.inputText,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  child: Opacity(
+                    opacity: 0,
+                    child: TextField(
+                      controller: controller,
+                      keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.done,
+                      autofillHints: const [AutofillHints.telephoneNumber],
+                      inputFormatters: [RussianPhoneInputFormatter()],
+                      onChanged: onChanged,
+                      onSubmitted: onSubmitted,
+                      maxLines: 1,
+                      style: _AuthFigma.inputText,
+                      decoration: InputDecoration(
+                        isCollapsed: true,
+                        border: InputBorder.none,
+                        hintText: '(921) 000-00-00',
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 20,
+            child: Text(
+              errorText ?? 'Отправим одноразовый код по SMS',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: _AuthFigma.secondaryText.copyWith(
+                color: errorText == null
+                    ? AppColors.secondary
+                    : AppColors.error,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ConsentRow extends StatelessWidget {
+  const _ConsentRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 44,
+      child: Row(
+        children: [
+          SizedBox.square(
+            dimension: 44,
+            child: Center(
+              child: Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: AppColors.secondary),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: SizedBox(
+              height: 40,
+              child: Text(
+                'Согласен на обработку\nперсональных данных',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: _AuthFigma.secondaryText.copyWith(
+                  color: AppColors.brand,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AuthHeader extends StatelessWidget {
+  const _AuthHeader({required this.title, this.onBack});
+
+  final String title;
+  final VoidCallback? onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: _AuthFigma.headerHeight,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Row(
+          children: [
+            SizedBox.square(
+              dimension: 44,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                tooltip: 'Назад',
+                onPressed: onBack,
+                icon: Transform.translate(
+                  offset: const Offset(-10, 0),
+                  child: SvgPicture.asset(
+                    DemoAssetPaths.back,
+                    width: 24,
+                    height: 24,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: SizedBox(
+                height: 24,
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.label.copyWith(color: AppColors.brand),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+}
+
+class _GradientHeadline extends StatelessWidget {
+  const _GradientHeadline(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (bounds) => AppGradients.brandHeader.createShader(bounds),
+      child: Text(
+        text,
+        style: AppTypography.title.copyWith(color: AppColors.brand),
+      ),
+    );
+  }
+}
+
+class _FigmaButton extends StatelessWidget {
+  const _FigmaButton({
+    required this.label,
+    required this.backgroundColor,
+    required this.textColor,
+    this.onPressed,
+  });
+
+  final String label;
+  final Color backgroundColor;
+  final Color textColor;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 52,
+      child: TextButton(
+        onPressed: onPressed,
+        style: ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll(backgroundColor),
+          foregroundColor: WidgetStatePropertyAll(textColor),
+          overlayColor: WidgetStatePropertyAll(
+            textColor.withValues(alpha: 0.08),
+          ),
+          shape: const WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: AppRadii.radius12),
+          ),
+          minimumSize: const WidgetStatePropertyAll(Size.zero),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          ),
+          textStyle: const WidgetStatePropertyAll(AppTypography.label),
+        ),
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.label.copyWith(color: textColor),
+        ),
+      ),
+    );
+  }
+}
+
+abstract final class _AuthFigma {
+  static const headerHeight = 56.0;
+
+  static final secondaryText = AppTypography.small.copyWith(
+    color: AppColors.secondary,
+  );
+
+  static final inputText = AppTypography.body.copyWith(color: AppColors.text);
 }
