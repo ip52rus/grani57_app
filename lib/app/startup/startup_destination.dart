@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../core/mock_runtime/demo_session.dart';
 import '../../core/mock_runtime/user_role.dart';
+import '../../features/development_demo/patient_shell_placeholder.dart';
 import '../../features/development_demo/startup_placeholders.dart';
 
 enum StartupDestination {

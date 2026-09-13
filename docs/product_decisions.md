@@ -39,6 +39,8 @@ Approved for Demo v0.1 on 2026-09-11.
 - Unknown phone numbers are treated as the future "new patient" flow:
   unknown number -> demo SMS verification -> new patient data -> Patient Shell.
 - The UI for the new-patient flow is not implemented in this stage.
+- Current Patient Auth slice implements only the three registered demo patients.
+  Unknown phone numbers must not create a patient automatically.
 - New patients must accept the current consent version.
 - Returning patients are not asked again when
   `acceptedConsentVersion == currentConsentVersion`.

@@ -13,6 +13,8 @@ import 'package:grani57_app/core/design_system/theme/app_theme.dart';
 import 'package:grani57_app/core/design_system/tokens/app_colors.dart';
 import 'package:grani57_app/core/design_system/tokens/app_spacing.dart';
 import 'package:grani57_app/core/design_system/typography/app_typography.dart';
+import 'package:grani57_app/features/patient_auth/patient_phone_login_screen.dart';
+import 'package:grani57_app/features/patient_auth/russian_phone_input_formatter.dart';
 import 'package:grani57_app/mock_data/demo_asset_paths.dart';
 import 'package:grani57_app/mock_data/demo_patients.dart';
 import 'package:grani57_app/mock_data/demo_schedule.dart';
@@ -31,7 +33,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Patient authentication'), findsOneWidget);
+    expect(find.text('Вход'), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsNothing);
     expect(
       find.text('You have pushed the button this many times:'),
@@ -80,10 +82,10 @@ void main() {
     expect(fadeTransition.opacity.value, lessThan(1));
   });
 
-  testWidgets('no session routes to patient auth placeholder', (tester) async {
+  testWidgets('no session routes to patient login screen', (tester) async {
     await _pumpStartupWithSession(tester, const DemoSession.unauthenticated());
 
-    expect(find.text('Patient authentication'), findsOneWidget);
+    expect(find.text('Вход'), findsOneWidget);
   });
 
   testWidgets('patient session routes to patient shell placeholder', (
@@ -147,7 +149,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Patient authentication'), findsOneWidget);
+    expect(find.text('Вход'), findsOneWidget);
     expect(preferences.getBool('demo_session.is_authenticated'), isNull);
     expect(preferences.getString('demo_session.user_id'), isNull);
     expect(preferences.getString('demo_session.role'), isNull);
@@ -192,6 +194,11 @@ void main() {
     expect(normalizeRussianPhone('89990000001'), '79990000001');
   });
 
+  test('phone formatter keeps convenient Russian display format', () {
+    expect(formatRussianPhone('+79990000001'), '+7 999 000-00-01');
+    expect(formatRussianPhone('89990000001'), '+7 999 000-00-01');
+  });
+
   test('demo patient lookup finds all registered patients', () {
     final auth = DemoAuthService();
 
@@ -211,6 +218,162 @@ void main() {
     expect(lookup.isRegistered, isFalse);
     expect(lookup.patient, isNull);
     expect(lookup.normalizedPhone, '79990009999');
+  });
+
+  testWidgets('Patient Login renders', (tester) async {
+    await _pumpPatientLogin(tester);
+
+    expect(find.text('Вход'), findsOneWidget);
+    expect(find.text('Телефон'), findsOneWidget);
+    expect(find.text('Получить код'), findsOneWidget);
+    expect(find.text('Вход для сотрудников'), findsOneWidget);
+  });
+
+  testWidgets('Patient auth screens fit reference widths and use keyboards', (
+    tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    tester.view.devicePixelRatio = 1;
+
+    for (final width in <double>[360, 393, 430]) {
+      tester.view.physicalSize = Size(width, 852);
+      await _pumpPatientLogin(tester);
+
+      final phoneField = tester.widget<TextField>(find.byType(TextField).first);
+      expect(phoneField.keyboardType, TextInputType.phone);
+      expect(tester.takeException(), isNull);
+
+      await _submitPhone(tester, '+7 999 000-00-01');
+      final codeField = tester.widget<TextField>(find.byType(TextField).last);
+      expect(codeField.keyboardType, TextInputType.number);
+      expect(tester.takeException(), isNull);
+    }
+  });
+
+  testWidgets('known patient opens SMS screen', (tester) async {
+    await _openSmsForPhone(tester, '+7 999 000-00-01');
+
+    expect(find.text('Код подтверждения'), findsOneWidget);
+    expect(find.textContaining('+7 999 000-00-01'), findsOneWidget);
+  });
+
+  testWidgets('unknown phone shows temporary registration state', (
+    tester,
+  ) async {
+    await _pumpPatientLogin(tester);
+    await _submitPhone(tester, '+7 999 000-99-99');
+
+    expect(
+      find.text(
+        'Регистрация нового пациента будет реализована следующим этапом',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Код подтверждения'), findsNothing);
+  });
+
+  testWidgets('correct SMS patient_001 saves session and routes to shell', (
+    tester,
+  ) async {
+    final preferences = await _loginWithSms(
+      tester,
+      phone: '+7 999 000-00-01',
+      code: '111111',
+    );
+
+    expect(find.text('Patient shell'), findsOneWidget);
+    expect(preferences.getBool('demo_session.is_authenticated'), isTrue);
+    expect(preferences.getString('demo_session.user_id'), 'patient_001');
+    expect(preferences.getString('demo_session.role'), UserRole.patient.name);
+  });
+
+  testWidgets('correct SMS patient_002 saves session and routes to shell', (
+    tester,
+  ) async {
+    final preferences = await _loginWithSms(
+      tester,
+      phone: '+7 999 000-00-02',
+      code: '222222',
+    );
+
+    expect(find.text('Patient shell'), findsOneWidget);
+    expect(preferences.getString('demo_session.user_id'), 'patient_002');
+  });
+
+  testWidgets('correct SMS patient_003 saves session and routes to shell', (
+    tester,
+  ) async {
+    final preferences = await _loginWithSms(
+      tester,
+      phone: '+7 999 000-00-03',
+      code: '333333',
+    );
+
+    expect(find.text('Patient shell'), findsOneWidget);
+    expect(preferences.getString('demo_session.user_id'), 'patient_003');
+  });
+
+  testWidgets('wrong SMS remains unauthenticated', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    await _openSmsForPhone(
+      tester,
+      '+7 999 000-00-01',
+      sessionStore: DemoSessionStore(preferences: preferences),
+    );
+
+    await _submitSms(tester, '000000');
+
+    expect(find.text('Неверный код подтверждения'), findsOneWidget);
+    expect(find.text('Код подтверждения'), findsOneWidget);
+    expect(preferences.getBool('demo_session.is_authenticated'), isNull);
+  });
+
+  testWidgets('Back from SMS returns to Login', (tester) async {
+    await _openSmsForPhone(tester, '+7 999 000-00-01');
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Вход'), findsOneWidget);
+    expect(find.text('Код подтверждения'), findsNothing);
+  });
+
+  testWidgets('Back after successful authentication does not return to auth', (
+    tester,
+  ) async {
+    await _loginWithSms(tester, phone: '+7 999 000-00-01', code: '111111');
+
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+
+    expect(find.text('Patient shell'), findsOneWidget);
+    expect(navigator.canPop(), isFalse);
+  });
+
+  testWidgets('employee link opens EmployeeAuthPlaceholder', (tester) async {
+    await _pumpPatientLogin(tester);
+
+    await tester.tap(find.text('Вход для сотрудников'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Employee authentication'), findsOneWidget);
+    expect(find.text('Development placeholder'), findsOneWidget);
+  });
+
+  testWidgets('restored authenticated patient skips Login after Splash', (
+    tester,
+  ) async {
+    await _pumpStartupWithSession(
+      tester,
+      const DemoSession.authenticated(
+        userId: 'patient_001',
+        role: UserRole.patient,
+      ),
+    );
+
+    expect(find.text('Patient shell'), findsOneWidget);
+    expect(find.text('Вход'), findsNothing);
   });
 
   test('SMS validation accepts registered demo code', () {
@@ -383,6 +546,57 @@ Future<void> _pumpStartupWithSession(
     ),
   );
   await tester.pumpAndSettle();
+}
+
+Future<void> _pumpPatientLogin(
+  WidgetTester tester, {
+  DemoSessionStore? sessionStore,
+}) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      key: UniqueKey(),
+      theme: AppTheme.light,
+      home: PatientPhoneLoginScreen(sessionStore: sessionStore),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+Future<void> _submitPhone(WidgetTester tester, String phone) async {
+  await tester.enterText(find.byType(TextField).first, phone);
+  await tester.tap(find.text('Получить код'));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _openSmsForPhone(
+  WidgetTester tester,
+  String phone, {
+  DemoSessionStore? sessionStore,
+}) async {
+  await _pumpPatientLogin(tester, sessionStore: sessionStore);
+  await _submitPhone(tester, phone);
+}
+
+Future<void> _submitSms(WidgetTester tester, String code) async {
+  await tester.enterText(find.byType(TextField).last, code);
+  await tester.tap(find.text('Войти'));
+  await tester.pumpAndSettle();
+}
+
+Future<SharedPreferences> _loginWithSms(
+  WidgetTester tester, {
+  required String phone,
+  required String code,
+}) async {
+  SharedPreferences.setMockInitialValues({});
+  final preferences = await SharedPreferences.getInstance();
+  await _openSmsForPhone(
+    tester,
+    phone,
+    sessionStore: DemoSessionStore(preferences: preferences),
+  );
+  await _submitSms(tester, code);
+  return preferences;
 }
 
 void _noop() {}

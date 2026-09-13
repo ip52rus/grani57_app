@@ -24,6 +24,10 @@
 - Added tests for Splash logo rendering, fade animation, startup routing
   branches, invalid-session fallback, and Splash removal from the navigation
   stack.
+- Added the first Patient Auth slice for registered demo patients: phone lookup,
+  SMS code screen, local mock SMS validation, session save, employee link
+  placeholder, and development-only session clearing from the patient shell
+  placeholder.
 
 ## Demo v0.1 Scope Decisions
 
@@ -46,12 +50,13 @@ These are not blockers for the current pixel-accurate Demo UI.
 
 ## Suggested Next Stage
 
-Replace the temporary patient auth placeholder with the first real auth UI:
+Continue auth work with the next deferred slice:
 
-1. Patient registration/login entry.
-2. Phone input using local mock patient lookup.
-3. Demo SMS entry with local mock validation.
-4. Route verified registered patients into the future patient shell.
+1. New patient registration form.
+2. Consent acceptance for new patients.
+3. Employee credential login UI for doctor and administrator roles.
+4. Replace the patient shell placeholder with the first patient home/shell
+   slice when approved.
 
 Do not start the 53 product screens until their target stage is explicitly
 approved.

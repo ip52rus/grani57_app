@@ -3,22 +3,14 @@ import 'package:flutter/material.dart';
 import '../../core/design_system/tokens/app_colors.dart';
 import '../../core/design_system/tokens/app_spacing.dart';
 import '../../core/design_system/typography/app_typography.dart';
+import '../patient_auth/patient_phone_login_screen.dart';
 
 class PatientAuthPlaceholder extends StatelessWidget {
   const PatientAuthPlaceholder({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const _StartupPlaceholder(title: 'Patient authentication');
-  }
-}
-
-class PatientShellPlaceholder extends StatelessWidget {
-  const PatientShellPlaceholder({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const _StartupPlaceholder(title: 'Patient shell');
+    return const PatientPhoneLoginScreen();
   }
 }
 

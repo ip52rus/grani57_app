@@ -20,6 +20,9 @@ SMS, payments, analytics, Firebase, or real medical data.
   minimal demo-session persistence.
 - `mock_data` contains demo-only fixtures for three registered patients, one
   doctor, one administrator, and a small doctor schedule.
+- `features/patient_auth` contains the first real patient authentication UI
+  slice: phone lookup for registered demo patients and local mock SMS
+  validation.
 - `features/development_demo` is a temporary technical sandbox for verifying the
   foundation. It is not a product screen and should be removed or hidden once
   approved Figma screens are implemented. It also contains the four temporary
@@ -43,6 +46,14 @@ SMS, payments, analytics, Firebase, or real medical data.
   complete.
 - Invalid or corrupted Demo session state safely falls back to the patient auth
   placeholder.
+- Returning demo patients authenticate through phone lookup plus local SMS code
+  validation. A successful SMS saves a patient `DemoSession` and replaces the
+  auth flow with the patient shell placeholder.
+- Unknown patient registration is intentionally deferred. Unknown phone numbers
+  show a temporary development/demo state and do not create patients or
+  sessions.
+- The employee login link opens a temporary employee-auth placeholder; doctor
+  and administrator credential UI remains deferred.
 - Dental For Windows, MIS/database integration, production authentication, and
   map SDK selection are deferred backend/platform topics, not blockers for the
   current Demo UI.
