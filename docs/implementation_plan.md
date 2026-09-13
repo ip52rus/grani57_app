@@ -18,6 +18,12 @@
 - Added tests for demo patient lookup, SMS validation, employee auth, session
   persistence, phone normalization, schedule references, Manrope configuration,
   and representative raster/SVG assets.
+- Added the first visible UI slice: Splash with real Figma logo, parallel demo
+  session restore, startup role routing, and four development-only destination
+  placeholders.
+- Added tests for Splash logo rendering, fade animation, startup routing
+  branches, invalid-session fallback, and Splash removal from the navigation
+  stack.
 
 ## Demo v0.1 Scope Decisions
 
@@ -25,7 +31,7 @@
 - Payments and receipts are out of scope for Demo v0.1.
 - Employee login is a single page; credentials determine doctor or administrator
   role.
-- Splash behavior is approved but not implemented in this stage.
+- Splash behavior is implemented for the startup-routing slice.
 - Future admin doctor credential management is approved as a requirement but no
   UI is implemented yet.
 
@@ -40,12 +46,12 @@ These are not blockers for the current pixel-accurate Demo UI.
 
 ## Suggested Next Stage
 
-Implement the first real UI slice:
+Replace the temporary patient auth placeholder with the first real auth UI:
 
-1. Splash UI with white background and logo opacity animation.
-2. Restore local demo session on startup.
-3. Route active sessions to the role-specific shell placeholder.
-4. Route missing sessions to patient registration/login entry.
+1. Patient registration/login entry.
+2. Phone input using local mock patient lookup.
+3. Demo SMS entry with local mock validation.
+4. Route verified registered patients into the future patient shell.
 
 Do not start the 53 product screens until their target stage is explicitly
 approved.

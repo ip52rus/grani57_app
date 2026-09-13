@@ -30,8 +30,8 @@ Approved for Demo v0.1 on 2026-09-11.
 - After Splash:
   - active local demo session routes to the corresponding main shell;
   - no active session routes to patient registration/login.
-- Splash UI is planned for the next stage. This stage only prepares session
-  foundation.
+- Splash UI is implemented in the startup-routing slice with temporary
+  development-only destinations.
 
 ## Patient Authentication And Consent
 

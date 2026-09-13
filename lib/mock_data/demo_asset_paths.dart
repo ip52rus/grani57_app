@@ -1,4 +1,5 @@
 abstract final class DemoAssetPaths {
+  static const logoWelcome = 'assets/icons/brand/logo_welcome.svg';
   static const doctorAnnaSmirnova =
       'assets/images/doctors/doctor_anna_smirnova.png';
   static const representativeRaster = 'assets/images/brand/glass_tooth.png';

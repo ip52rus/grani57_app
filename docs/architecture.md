@@ -7,9 +7,12 @@ SMS, payments, analytics, Firebase, or real medical data.
 ## Current Shape
 
 - `lib/main.dart` delegates startup to `app/bootstrap/bootstrap.dart`.
-- `Grani57App` owns the root `MaterialApp`, light theme, and role gate.
-- `app/role_gate` is a neutral routing boundary for future patient, doctor, and
-  admin shells. It currently points to a development-only foundation screen.
+- `Grani57App` owns the root `MaterialApp`, light theme, and startup
+  coordinator.
+- `app/startup` contains the real Splash screen, startup session restore, and
+  the role-to-destination decision for the current Demo slice.
+- `app/role_gate` remains a neutral routing boundary for future patient,
+  doctor, and admin shells. It is not used by the current Splash startup flow.
 - `app/router` holds named-route constants only; no third-party router is used.
 - `core/design_system` contains semantic tokens, typography, theme primitives,
   gradients, effects, and reusable foundation components.
@@ -19,7 +22,8 @@ SMS, payments, analytics, Firebase, or real medical data.
   doctor, one administrator, and a small doctor schedule.
 - `features/development_demo` is a temporary technical sandbox for verifying the
   foundation. It is not a product screen and should be removed or hidden once
-  approved Figma screens are implemented.
+  approved Figma screens are implemented. It also contains the four temporary
+  startup placeholders used to verify routing branches.
 
 ## Constraints
 
@@ -34,6 +38,11 @@ SMS, payments, analytics, Firebase, or real medical data.
 - `DemoSessionStore` persists only the minimal session state required for the
   future Splash routing decision: `restoreSession()`, `saveSession()`, and
   `clearSession()`.
+- Startup runs Splash presentation and `restoreSession()` in parallel. Routing
+  occurs only after both the minimum Splash presentation and session restore are
+  complete.
+- Invalid or corrupted Demo session state safely falls back to the patient auth
+  placeholder.
 - Dental For Windows, MIS/database integration, production authentication, and
   map SDK selection are deferred backend/platform topics, not blockers for the
   current Demo UI.

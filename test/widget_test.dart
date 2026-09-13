@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:grani57_app/app/app.dart';
+import 'package:grani57_app/app/startup/splash_screen.dart';
 import 'package:grani57_app/core/mock_runtime/demo_auth_service.dart';
 import 'package:grani57_app/core/mock_runtime/demo_session.dart';
 import 'package:grani57_app/core/mock_runtime/demo_session_store.dart';
@@ -18,10 +19,19 @@ import 'package:grani57_app/mock_data/demo_schedule.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  testWidgets('application bootstraps without counter app', (tester) async {
-    await tester.pumpWidget(const Grani57App());
+  testWidgets('application bootstraps with splash without counter app', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Grani57App(
+        restoreSession: () async => const DemoSession.unauthenticated(),
+        minimumSplashDuration: Duration.zero,
+        splashFadeDuration: Duration.zero,
+      ),
+    );
+    await tester.pumpAndSettle();
 
-    expect(find.text('57 ГРАНЕЙ'), findsOneWidget);
+    expect(find.text('Patient authentication'), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsNothing);
     expect(
       find.text('You have pushed the button this many times:'),
@@ -36,6 +46,129 @@ void main() {
     expect(theme.colorScheme.primary, AppColors.brand);
     expect(theme.textTheme.headlineLarge?.fontFamily, AppTypography.fontFamily);
     expect(AppSpacing.pagePadding, 24);
+  });
+
+  testWidgets('Splash renders real logo asset', (tester) async {
+    final logoSvg = await rootBundle.loadString(DemoAssetPaths.logoWelcome);
+
+    await tester.pumpWidget(const MaterialApp(home: SplashScreen()));
+
+    expect(logoSvg, contains('<svg width="260" height="75"'));
+    expect(find.byType(SvgPicture), findsOneWidget);
+  });
+
+  testWidgets('Splash starts transparent and transitions toward visible', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SplashScreen(fadeDuration: Duration(milliseconds: 1500)),
+      ),
+    );
+
+    FadeTransition fadeTransition = tester.widget(
+      find.byKey(const ValueKey('splash.logo.fade')),
+    );
+    expect(fadeTransition.opacity.value, 0);
+
+    await tester.pump(const Duration(milliseconds: 500));
+    fadeTransition = tester.widget(
+      find.byKey(const ValueKey('splash.logo.fade')),
+    );
+
+    expect(fadeTransition.opacity.value, greaterThan(0));
+    expect(fadeTransition.opacity.value, lessThan(1));
+  });
+
+  testWidgets('no session routes to patient auth placeholder', (tester) async {
+    await _pumpStartupWithSession(tester, const DemoSession.unauthenticated());
+
+    expect(find.text('Patient authentication'), findsOneWidget);
+  });
+
+  testWidgets('patient session routes to patient shell placeholder', (
+    tester,
+  ) async {
+    await _pumpStartupWithSession(
+      tester,
+      const DemoSession.authenticated(
+        userId: 'patient_001',
+        role: UserRole.patient,
+      ),
+    );
+
+    expect(find.text('Patient shell'), findsOneWidget);
+  });
+
+  testWidgets('doctor session routes to doctor shell placeholder', (
+    tester,
+  ) async {
+    await _pumpStartupWithSession(
+      tester,
+      const DemoSession.authenticated(
+        userId: 'doctor_001',
+        role: UserRole.doctor,
+      ),
+    );
+
+    expect(find.text('Doctor shell'), findsOneWidget);
+  });
+
+  testWidgets('admin session routes to administrator shell placeholder', (
+    tester,
+  ) async {
+    await _pumpStartupWithSession(
+      tester,
+      const DemoSession.authenticated(
+        userId: 'admin_001',
+        role: UserRole.administrator,
+      ),
+    );
+
+    expect(find.text('Administrator shell'), findsOneWidget);
+  });
+
+  testWidgets('invalid session routes to patient auth fallback', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'demo_session.is_authenticated': true,
+      'demo_session.user_id': 'patient_001',
+      'demo_session.role': 'unknown_role',
+    });
+    final preferences = await SharedPreferences.getInstance();
+
+    await tester.pumpWidget(
+      Grani57App(
+        sessionStore: DemoSessionStore(preferences: preferences),
+        minimumSplashDuration: Duration.zero,
+        splashFadeDuration: Duration.zero,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Patient authentication'), findsOneWidget);
+    expect(preferences.getBool('demo_session.is_authenticated'), isNull);
+    expect(preferences.getString('demo_session.user_id'), isNull);
+    expect(preferences.getString('demo_session.role'), isNull);
+  });
+
+  testWidgets('Splash is removed from navigation stack after routing', (
+    tester,
+  ) async {
+    await _pumpStartupWithSession(
+      tester,
+      const DemoSession.authenticated(
+        userId: 'patient_001',
+        role: UserRole.patient,
+      ),
+    );
+
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+
+    expect(find.byType(SplashScreen), findsNothing);
+    expect(find.text('Patient shell'), findsOneWidget);
+    expect(navigator.canPop(), isFalse);
   });
 
   test('Manrope typography maps required weights', () {
@@ -236,6 +369,20 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.text('Loading action'), findsNothing);
   });
+}
+
+Future<void> _pumpStartupWithSession(
+  WidgetTester tester,
+  DemoSession session,
+) async {
+  await tester.pumpWidget(
+    Grani57App(
+      restoreSession: () async => session,
+      minimumSplashDuration: Duration.zero,
+      splashFadeDuration: Duration.zero,
+    ),
+  );
+  await tester.pumpAndSettle();
 }
 
 void _noop() {}

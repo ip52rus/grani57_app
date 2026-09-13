@@ -13,20 +13,25 @@ class DemoSessionStore {
   final SharedPreferences? preferences;
 
   Future<DemoSession> restoreSession() async {
-    final preferences = await _getPreferences();
-    final isAuthenticated = preferences.getBool(_isAuthenticatedKey) ?? false;
-    if (!isAuthenticated) {
-      return const DemoSession.unauthenticated();
-    }
+    try {
+      final preferences = await _getPreferences();
+      final isAuthenticated = preferences.getBool(_isAuthenticatedKey) ?? false;
+      if (!isAuthenticated) {
+        return const DemoSession.unauthenticated();
+      }
 
-    final userId = preferences.getString(_userIdKey);
-    final role = _parseRole(preferences.getString(_roleKey));
-    if (userId == null || role == null) {
+      final userId = preferences.getString(_userIdKey);
+      final role = _parseRole(preferences.getString(_roleKey));
+      if (userId == null || role == null) {
+        await clearSession();
+        return const DemoSession.unauthenticated();
+      }
+
+      return DemoSession.authenticated(userId: userId, role: role);
+    } catch (_) {
       await clearSession();
       return const DemoSession.unauthenticated();
     }
-
-    return DemoSession.authenticated(userId: userId, role: role);
   }
 
   Future<void> saveSession(DemoSession session) async {
