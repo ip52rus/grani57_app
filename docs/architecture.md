@@ -1,5 +1,9 @@
 # Architecture
 
+> Historical foundation snapshot. For the current implemented feature map and
+> runtime status, use `docs/codex/PROJECT_CONTEXT.md` and
+> `docs/codex/CURRENT_STATE.md`.
+
 This project is the Flutter foundation for the `57 ГРАНЕЙ` iOS and Android app.
 It intentionally does not implement product screens, backend integration, real
 SMS, payments, analytics, Firebase, or real medical data.

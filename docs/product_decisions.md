@@ -22,6 +22,25 @@ Approved for Demo v0.1 on 2026-09-11.
 - The old Figma "Оплаты и чеки" link is not implemented as a working function in
   Demo v0.1.
 
+## Patient Notifications
+
+- The in-app notification inbox is available independently of the operating
+  system push permission.
+- The operating system permission prompt is never shown at app launch. It is
+  requested only after an explicit, contextual action such as "Включить
+  напоминания" after a successful appointment booking.
+- Appointment and document categories default to enabled. News and promotions
+  default to disabled and require a separate opt-in.
+- If the operating system permission was denied, the app cannot repeatedly
+  display the system prompt. The settings screen explains the state and opens
+  the app's system settings.
+- Push text must not include diagnoses, treatment results, or other medical
+  details. Those details are available only after authentication inside the
+  app.
+- Demo v0.1 stores category choices, permission-request state, and read inbox
+  items locally. Remote delivery through APNs/FCM will replace the demo data
+  source when the backend is connected.
+
 ## Splash
 
 - Splash behavior is white background, logo opacity starts at `0`, smoothly
@@ -38,9 +57,10 @@ Approved for Demo v0.1 on 2026-09-11.
 - Registered demo patients authenticate through local mock SMS validation.
 - Unknown phone numbers are treated as the future "new patient" flow:
   unknown number -> demo SMS verification -> new patient data -> Patient Shell.
-- The UI for the new-patient flow is not implemented in this stage.
-- Current Patient Auth slice implements only the three registered demo patients.
-  Unknown phone numbers must not create a patient automatically.
+- The new-patient flow is implemented locally for the Demo. It creates a
+  patient session only after demo SMS verification and valid patient data.
+- The three registered demo patients continue to use their fixture identities;
+  an unknown phone must not be treated as one of those registered patients.
 - New patients must accept the current consent version.
 - Returning patients are not asked again when
   `acceptedConsentVersion == currentConsentVersion`.

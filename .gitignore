@@ -17,6 +17,7 @@ migrate_working_dir/
 *.ipr
 *.iws
 .idea/
+.mapkit.env
 
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line
@@ -32,6 +33,10 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+
+# Generated visual/golden test diagnostics
+test/**/failures/
+docs/visual_tests/**/*_diff.png
 
 # Symbolication related
 app.*.symbols

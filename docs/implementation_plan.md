@@ -1,5 +1,9 @@
 # Implementation Plan
 
+> Historical foundation plan. Its suggested next stage has already been
+> implemented in the current working tree. Use `docs/codex/CURRENT_STATE.md`
+> and `docs/codex/SCREEN_INDEX.md` for current work.
+
 ## Completed In This Foundation
 
 - Created iOS/Android-only Flutter project.
