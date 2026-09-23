@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grani57_app/core/design_system/theme/app_theme.dart';
+import 'package:grani57_app/features/patient_auth/birth_date_input.dart';
 import 'package:grani57_app/features/patient_auth/patient_phone_login_screen.dart';
 import 'package:grani57_app/features/patient_auth/russian_phone_input_formatter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,15 +51,15 @@ void main() {
     ]) {
       expect(
         formatter.formatEditUpdate(_value(''), _value(input)).text,
-        '999 000-00-01',
+        '(999) 000-00-01',
       );
     }
     expect(formatter.formatEditUpdate(_value(''), _value('abc')).text, isEmpty);
   });
 
   test('backspace and forward delete across every mask separator', () {
-    const text = '912 345-67-89';
-    for (final separator in [3, 7, 10]) {
+    const text = '(912) 345-67-89';
+    for (final separator in [5, 9, 12]) {
       final digitIndex = _digits(text.substring(0, separator)).length;
       final after = text.replaceRange(separator, separator + 1, '');
       final backspace = formatter.formatEditUpdate(
@@ -91,100 +92,120 @@ void main() {
   });
 
   test(
+    'backspace removes a digit when iOS first removes a closing bracket',
+    () {
+      final deleted = formatter.formatEditUpdate(
+        _value('(999)', 4),
+        _value('(999', 4),
+      );
+
+      expect(deleted.text, '(99');
+      expect(deleted.selection.extentOffset, deleted.text.length);
+    },
+  );
+
+  test(
+    'backspace through the closing bracket works with iOS cursor movement',
+    () {
+      final deleted = formatter.formatEditUpdate(
+        _value('(999)', 5),
+        _value('(999', 4),
+      );
+
+      expect(deleted.text, '(99');
+      expect(deleted.selection.extentOffset, deleted.text.length);
+    },
+  );
+
+  test(
     'middle edit preserves cursor and selected text can be replaced/cleared',
     () {
       final inserted = formatter.formatEditUpdate(
-        _value('912 45', 4),
-        _value('912 345', 5),
+        _value('(912) 45', 6),
+        _value('(912) 345', 7),
       );
-      expect(inserted.text, '912 345');
-      expect(inserted.selection.extentOffset, 5);
+      expect(inserted.text, '(912) 345');
+      expect(inserted.selection.extentOffset, 7);
       final selected = TextEditingValue(
-        text: '912 345-67-89',
-        selection: const TextSelection(baseOffset: 4, extentOffset: 7),
+        text: '(912) 345-67-89',
+        selection: const TextSelection(baseOffset: 6, extentOffset: 9),
       );
       final replaced = formatter.formatEditUpdate(
         selected,
-        _value('912 0-67-89', 5),
+        _value('(912) 0-67-89', 7),
       );
-      expect(replaced.text, '912 067-89');
-      expect(replaced.selection.extentOffset, 5);
+      expect(replaced.text, '(912) 067-89');
+      expect(replaced.selection.extentOffset, 7);
       expect(formatter.formatEditUpdate(selected, _value('')).text, isEmpty);
     },
   );
+
+  test('birth date input rejects impossible calendar dates', () {
+    final today = DateTime(2026, 9, 14);
+
+    expect(BirthDateInput.canAppendDigit('310', '2', now: today), isFalse);
+    expect(BirthDateInput.canAppendDigit('2902202', '5', now: today), isFalse);
+    expect(BirthDateInput.canAppendDigit('2902202', '4', now: today), isTrue);
+    expect(BirthDateInput.canAppendDigit('1509202', '7', now: today), isFalse);
+    expect(BirthDateInput.isCompleteValid('29022024', now: today), isTrue);
+    expect(BirthDateInput.isCompleteValid('29022025', now: today), isFalse);
+    expect(BirthDateInput.format('12041993'), '12.04.1993');
+  });
 
   testWidgets('phone prefix is fixed and partial local input cannot submit', (
     tester,
   ) async {
     await _pumpLogin(tester);
-    final controller = tester
-        .widget<TextField>(find.byType(TextField))
-        .controller!;
-    expect(find.text('+7 (921) 000-00-00'), findsOneWidget);
-    expect(find.text('999 000-00-01'), findsNothing);
-    expect(controller.text, isEmpty);
-    await tester.tap(find.byType(TextField));
-    for (final digit in '9990000001'.split('')) {
-      tester.testTextInput.updateEditingValue(_value(controller.text + digit));
-      await tester.pump();
-    }
-    expect(controller.text, '999 000-00-01');
-    for (var i = 0; i < 10; i++) {
-      tester.testTextInput.updateEditingValue(
-        _value(controller.text.substring(0, controller.text.length - 1)),
-      );
-      await tester.pump();
-    }
-    expect(controller.text, isEmpty);
-    expect(find.text('+7 (921) 000-00-00'), findsOneWidget);
-    await tester.enterText(find.byType(TextField), '999000000');
+    expect(find.text('+7 '), findsOneWidget);
+    final phoneField = find.byKey(const ValueKey('patient.phone.input'));
+    expect(
+      tester.widget<TextField>(phoneField).enableInteractiveSelection,
+      isTrue,
+    );
+    await tester.enterText(phoneField, '9990000001');
+    await tester.pump();
+    expect(
+      tester.widget<TextField>(phoneField).controller!.text,
+      '(999) 000-00-01',
+    );
+    await tester.enterText(phoneField, '');
+    await tester.pump();
+    expect(tester.widget<TextField>(phoneField).controller!.text, isEmpty);
+    await _enterDigits(tester, 'patient.phone.input', '999000000');
+    await tester.tap(find.byKey(const ValueKey('patient.consent.checkbox')));
+    await tester.pump();
     await tester.tap(find.text('Получить код'));
     await tester.pumpAndSettle();
     expect(find.text('Введите номер телефона'), findsOneWidget);
     expect(find.text('Подтверждение номера'), findsNothing);
   });
 
-  testWidgets(
-    'SMS accepts sixth digit, limits paste and typing, deletes to empty',
-    (tester) async {
-      await _openSms(tester);
-      final field = tester.widget<TextField>(find.byType(TextField));
-      expect(
-        field.inputFormatters!.whereType<RussianPhoneInputFormatter>(),
-        isEmpty,
-      );
-      final controller = field.controller!;
-      expect(controller.text, isEmpty);
-      expect(find.text('+7 '), findsNothing);
-      await tester.tap(find.byType(TextField));
-      for (var i = 1; i <= 6; i++) {
-        tester.testTextInput.updateEditingValue(_value('${controller.text}$i'));
-        await tester.pump();
-        expect(controller.text, '123456'.substring(0, i));
-      }
-      tester.testTextInput.updateEditingValue(_value('${controller.text}7'));
-      await tester.pump();
-      expect(controller.text, '123456');
-      for (var i = 5; i >= 0; i--) {
-        tester.testTextInput.updateEditingValue(
-          _value(controller.text.substring(0, controller.text.length - 1)),
-        );
-        await tester.pump();
-        expect(controller.text, '123456'.substring(0, i));
-      }
-      await tester.enterText(find.byType(TextField), 'a01 23-45678');
-      expect(controller.text, '012345');
-      await tester.enterText(find.byType(TextField), '11111');
-      await tester.tap(find.text('Продолжить'));
-      await tester.pumpAndSettle();
-      expect(find.text('Введите 6 цифр из SMS'), findsOneWidget);
-      await tester.enterText(find.byType(TextField), '111111');
-      expect(controller.text, '111111');
-      await tester.tap(find.text('Продолжить'));
-      await tester.pumpAndSettle();
-      expect(find.text('Patient shell'), findsOneWidget);
-    },
-  );
+  testWidgets('SMS uses native numeric input and accepts six digits', (
+    tester,
+  ) async {
+    await _openSms(tester);
+    expect(find.text('+7 '), findsNothing);
+    final field = find.byKey(const ValueKey('patient.sms.input'));
+    final smsField = tester.widget<TextField>(field);
+    expect(smsField.keyboardType, TextInputType.number);
+    expect(smsField.enableInteractiveSelection, isTrue);
+    expect(smsField.autofillHints, contains(AutofillHints.oneTimeCode));
+    await tester.enterText(field, '1234567');
+    await tester.pump();
+    expect(tester.widget<TextField>(field).controller!.text, '123456');
+    await tester.enterText(field, '');
+    await tester.pump();
+    expect(tester.widget<TextField>(field).controller!.text, isEmpty);
+    await _enterDigits(tester, 'patient.sms.input', '11111');
+    await tester.tap(find.text('Продолжить'));
+    await tester.pumpAndSettle();
+    expect(find.text('Введите 6 цифр из SMS'), findsOneWidget);
+    await _enterDigits(tester, 'patient.sms.input', '111111');
+    expect(tester.widget<TextField>(field).controller!.text, '111111');
+    await tester.tap(find.text('Продолжить'));
+    await tester.pumpAndSettle();
+    expect(find.text('Здравствуйте, Иван'), findsOneWidget);
+  });
 }
 
 Future<void> _pumpLogin(WidgetTester tester) async {
@@ -197,9 +218,21 @@ Future<void> _pumpLogin(WidgetTester tester) async {
 
 Future<void> _openSms(WidgetTester tester) async {
   await _pumpLogin(tester);
-  await tester.enterText(find.byType(TextField), '9990000001');
+  await _enterDigits(tester, 'patient.phone.input', '9990000001');
+  await tester.tap(find.byKey(const ValueKey('patient.consent.checkbox')));
+  await tester.pump();
   await tester.tap(find.text('Получить код'));
   await tester.pumpAndSettle();
   expect(find.text('Подтверждение номера'), findsOneWidget);
-  expect(find.textContaining('+7 999 000-00-01'), findsOneWidget);
+  expect(find.textContaining('+7 (999) 000-00-01'), findsOneWidget);
+}
+
+Future<void> _enterDigits(
+  WidgetTester tester,
+  String fieldKey,
+  String digits,
+) async {
+  final field = find.byKey(ValueKey(fieldKey));
+  await tester.enterText(field, digits);
+  await tester.pumpAndSettle();
 }

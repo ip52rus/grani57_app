@@ -20,6 +20,12 @@ The design system is sourced from
 - `AppTextField`: default/focus/error behavior through Flutter input state.
 - `AppToggle`: adaptive switch with semantics wrapper and 60x44 layout.
 - `AppCheckbox`: checkbox with semantics wrapper and 48x48 hit target.
+- `AppNumericKeypad`: the required keypad for digit-only input. It uses equal
+  keys, closes by swipe or outside tap, and intentionally does not expose
+  platform autofill, text-selection, scanning, or context menus.
+- `AppBackSwipe`: the root navigation wrapper. On every screen that has a
+  previous route, a rightward swipe from the left edge returns through the
+  existing navigator stack. New screens receive this behavior automatically.
 
 ## Assets
 

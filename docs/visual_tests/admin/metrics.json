@@ -1,0 +1,74 @@
+{
+  "admin_login": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 235240,
+    "changedPercentage": 70.25528915648258
+  },
+  "admin_home": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 209920,
+    "changedPercentage": 62.69337825084519
+  },
+  "admin_publications": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 183423,
+    "changedPercentage": 54.77995197648998
+  },
+  "admin_publication_new": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 210495,
+    "changedPercentage": 62.8651041106691
+  },
+  "admin_publication_edit": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 264313,
+    "changedPercentage": 78.93804728284891
+  },
+  "admin_publication_delete": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 243209,
+    "changedPercentage": 72.63526024680739
+  },
+  "admin_doctors": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 191626,
+    "changedPercentage": 57.2298080254214
+  },
+  "admin_doctor_new": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 214536,
+    "changedPercentage": 64.07196358814464
+  },
+  "admin_doctor_edit": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 249864,
+    "changedPercentage": 74.6228004157259
+  },
+  "admin_doctor_delete": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 240813,
+    "changedPercentage": 71.91968605526287
+  },
+  "admin_doctor_access_create": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 292844,
+    "changedPercentage": 87.4589351204769
+  },
+  "admin_doctor_access_existing": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 268178,
+    "changedPercentage": 80.09234371453488
+  }
+}

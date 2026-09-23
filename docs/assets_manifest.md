@@ -82,8 +82,8 @@ The icons are multicolor: active and inactive variants differ in blue/gray treat
 |---|---|---|---|---|
 | `assets/icons/content/document.svg` | `11:201` — Иконка / file | SVG, 24×24 | Document list items | Reused |
 | `assets/icons/content/appointment_calendar.svg` | `16:127` — Иконка / calendar | SVG, 24×24 | Doctor appointment information | Reused |
-| `assets/icons/status/success_check.svg` | `10:71` — Иконка / check | SVG, 40×40 | Appointment-created success | Reused for equivalent success state only |
-| `assets/icons/status/time_conflict.svg` | `21:360` — Иконка / clock | SVG, 48×48 | Busy-slot / uncertain-time state | Reused |
+| `assets/icons/status/booking_success_check_clean.svg` | `10:71` — Иконка / check | SVG, 40×40 | Appointment-created success | Clean source vector from Figma MCP |
+| `assets/icons/status/booking_clock_clean.svg` | `21:360`, `15:388` — Иконка / clock | SVG, 48×48 | Busy-slot / uncertain-time state | Clean source vector from Figma MCP |
 | `assets/icons/status/empty_appointments.svg` | `15:364` — Иконка / calendar | SVG, 48×48 | Patient empty appointments | Unique |
 | `assets/icons/status/notification_permission.svg` | `21:431` — Иконка / bell | SVG, 56×56 | Notification pre-permission screen | Unique |
 | `assets/icons/status/new_branch.svg` | `21:335` — Иконка / pin | SVG, 48×48 | New-branch publication detail | Unique |

@@ -1,0 +1,20 @@
+{
+  "booking_time_unavailable": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 261926,
+    "changedPercentage": 78.22516097432774
+  },
+  "booking_offline": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 246955,
+    "changedPercentage": 73.75401689185153
+  },
+  "booking_success": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 228309,
+    "changedPercentage": 68.18532057484859
+  }
+}

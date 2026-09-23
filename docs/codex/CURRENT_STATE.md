@@ -1,6 +1,6 @@
 # Текущее состояние
 
-Снимок: 2026-09-21. Branch `main`, последний commit
+Снимок: 2026-09-22. Branch `main`, последний commit
 `1baf575 style: match patient auth screens to figma` (2026-09-13).
 
 ## Реализовано в patient demo
@@ -18,22 +18,32 @@
   denied-state переход в system settings и deep links к demo content.
 - Общая адаптивная навигация, back swipe, numeric keypad и design system.
 
+## Реализовано в doctor demo
+
+- Вход врача из существующей точки «Вход для сотрудников» с проверкой роли.
+- Сохранение и восстановление doctor session через общий mock runtime.
+- Расписание Анны Смирновой: календарь, рабочий день, записи и local refresh.
+- Model-driven карточка записи пациента и возврат с сохранением даты.
+- Пустая дата как inline-состояние расписания без отдельного экрана; выход из
+  doctor session доступен в шапке.
+- Статусы вынесены в цветные метки карточек расписания: подтверждённый приём
+  зелёный, завершённый красный; экран записи пациента статус не повторяет.
+
 ## Последняя завершённая работа
 
-Flow уведомлений реализован и локально проверен. Последняя зафиксированная
-проверка перед этой документационной задачей:
+Doctor Cabinet реализован по четырём Figma frames. Targeted behavioral и visual
+tests добавлены.
 
 - `flutter analyze` — без замечаний;
-- `flutter test` — 118 tests passed;
-- iOS release build без codesign — успешно;
-- Android debug APK — успешно.
+- targeted doctor/auth/navigation/visual tests — 79 tests passed;
+- полный `flutter test` — 132 tests passed.
 
-Телефонная проверка notification flow и возможные визуальные коррекции остаются
-следующим шагом владельца.
+Телефонная проверка Doctor Cabinet и возможные визуальные коррекции остаются
+следующим шагом владельца. Native builds в этой задаче не запускались.
 
 ## Не завершено
 
-- Doctor cabinet и administrator app: только routing placeholders.
+- Administrator app: только routing placeholder.
 - Production backend/MIS, реальные SMS/auth, remote appointment data.
 - APNs/FCM remote delivery и server-side notification events.
 - Production storage/security/privacy hardening.
@@ -52,4 +62,4 @@ Flow уведомлений реализован и локально прове�
 ## Следующее действие
 
 После device QA корректировать только найденный flow. Если patient demo принят,
-следующий отдельный этап — doctor/admin scope после явного задания.
+следующий отдельный этап — administrator scope после явного задания.

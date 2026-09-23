@@ -18,12 +18,16 @@ class Grani57App extends StatelessWidget {
   final Duration minimumSplashDuration;
   final Duration splashFadeDuration;
 
+  static final _navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: _navigatorKey,
       title: '57 ГРАНЕЙ',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      scrollBehavior: const MaterialScrollBehavior(),
       home: StartupCoordinator(
         sessionStore: sessionStore,
         restoreSession: restoreSession,

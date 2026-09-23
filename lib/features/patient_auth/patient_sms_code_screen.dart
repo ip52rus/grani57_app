@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../core/design_system/gradients/app_gradients.dart';
+import '../../core/navigation/app_page_route.dart';
 import '../../core/design_system/tokens/app_colors.dart';
 import '../../core/design_system/tokens/app_radii.dart';
 import '../../core/design_system/typography/app_typography.dart';
@@ -10,18 +10,21 @@ import '../../core/mock_runtime/demo_auth_service.dart';
 import '../../core/mock_runtime/demo_session_store.dart';
 import '../../mock_data/demo_asset_paths.dart';
 import '../development_demo/patient_shell_placeholder.dart';
+import 'patient_new_data_screen.dart';
 
 class PatientSmsCodeScreen extends StatefulWidget {
   const PatientSmsCodeScreen({
     required this.phone,
     required this.patientId,
+    this.isNewPatient = false,
     required this.authService,
     required this.sessionStore,
     super.key,
   });
 
   final String phone;
-  final String patientId;
+  final String? patientId;
+  final bool isNewPatient;
   final DemoAuthService authService;
   final DemoSessionStore sessionStore;
 
@@ -57,11 +60,40 @@ class _PatientSmsCodeScreenState extends State<PatientSmsCodeScreen> {
       _codeError = null;
     });
 
+    final isVerified = widget.isNewPatient
+        ? widget.authService.validateNewPatientSms(code)
+        : widget.authService.authenticateRegisteredPatient(
+                rawPhone: widget.phone,
+                smsCode: code,
+              ) !=
+              null;
+
+    if (!isVerified) {
+      setState(() {
+        _isSubmitting = false;
+        _codeError = 'Неверный код подтверждения';
+      });
+      return;
+    }
+
+    if (widget.isNewPatient) {
+      Navigator.of(context).pushAndRemoveUntil(
+        appPageRoute<void>(
+          context,
+          builder: (_) => PatientNewDataScreen(
+            phone: widget.phone,
+            sessionStore: widget.sessionStore,
+          ),
+        ),
+        (_) => false,
+      );
+      return;
+    }
+
     final session = widget.authService.authenticateRegisteredPatient(
       rawPhone: widget.phone,
       smsCode: code,
     );
-
     if (session == null) {
       setState(() {
         _isSubmitting = false;
@@ -77,132 +109,146 @@ class _PatientSmsCodeScreenState extends State<PatientSmsCodeScreen> {
     }
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(
-        builder: (_) =>
-            PatientShellPlaceholder(sessionStore: widget.sessionStore),
+      appPageRoute<void>(
+        context,
+        builder: (_) => PatientShellPlaceholder(
+          sessionStore: widget.sessionStore,
+          patientId: session.userId,
+          phone: session.phone,
+          patientName: session.name,
+        ),
       ),
       (_) => false,
     );
   }
 
+  void _clearCodeError() {
+    if (_codeError != null) {
+      setState(() => _codeError = null);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final statusHeight = MediaQuery.paddingOf(context).top;
+    const statusHeight = 44.0;
     final contentHeight =
         MediaQuery.sizeOf(context).height -
         statusHeight -
         _SmsFigma.headerHeight;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          SizedBox(height: statusHeight),
-          _SmsHeader(
-            title: 'Подтверждение номера',
-            onBack: () => Navigator.of(context).pop(),
-          ),
-          SizedBox(
-            height: contentHeight,
-            child: SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 60, 24, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(
-                      height: 36,
-                      child: _GradientHeadline('Введите код'),
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      height: 20,
-                      child: Text(
-                        'Отправили SMS на ${widget.phone}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: _SmsFigma.secondaryText,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _FigmaSmsField(
-                      controller: _codeController,
-                      errorText: _codeError,
-                      onChanged: (_) {
-                        if (_codeError != null) {
-                          setState(() => _codeError = null);
-                        }
-                      },
-                      onSubmitted: (_) => _submitCode(),
-                    ),
-                    const SizedBox(height: 20),
-                    _FigmaButton(
-                      label: 'Продолжить',
-                      backgroundColor: AppColors.brand,
-                      textColor: AppColors.onBrand,
-                      onPressed: _isSubmitting ? null : _submitCode,
-                    ),
-                    const SizedBox(height: 20),
-                    _FigmaButton(
-                      label: 'Изменить номер',
-                      backgroundColor: AppColors.surface,
-                      textColor: AppColors.brand,
-                      onPressed: _isSubmitting
-                          ? null
-                          : () => Navigator.of(context).pop(),
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      height: 20,
-                      child: Text(
-                        'Отправить новый код через 00:42',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: _SmsFigma.secondaryText,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Container(
-                      height: 116,
-                      decoration: const BoxDecoration(
-                        color: AppColors.soft,
-                        borderRadius: AppRadii.radius20,
-                      ),
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            height: 24,
-                            child: Text(
-                              'Не приходит SMS?',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTypography.label.copyWith(
-                                color: AppColors.brand,
+    return ClipRRect(
+      borderRadius: AppRadii.radius28,
+      child: Scaffold(
+        backgroundColor: _SmsFigma.background,
+        body: Column(
+          children: [
+            SizedBox(height: statusHeight),
+            _SmsHeader(
+              title: 'Подтверждение номера',
+              onBack: () => Navigator.of(context).pop(),
+            ),
+            SizedBox(
+              height: contentHeight,
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: FocusManager.instance.primaryFocus?.unfocus,
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 60, 24, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(
+                          height: 36,
+                          child: _GradientHeadline('Введите код'),
+                        ),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          height: 20,
+                          child: Text(
+                            'Отправили SMS на ${widget.phone}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: _SmsFigma.secondaryText,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        _FigmaSmsField(
+                          controller: _codeController,
+                          errorText: _codeError,
+                          onChanged: (_) => _clearCodeError(),
+                        ),
+                        const SizedBox(height: 20),
+                        _FigmaButton(
+                          label: 'Продолжить',
+                          backgroundColor: AppColors.brand,
+                          textColor: AppColors.onBrand,
+                          onPressed: _isSubmitting ? null : _submitCode,
+                        ),
+                        const SizedBox(height: 20),
+                        _FigmaButton(
+                          label: 'Изменить номер',
+                          backgroundColor: AppColors.surface,
+                          textColor: AppColors.brand,
+                          onPressed: _isSubmitting
+                              ? null
+                              : () => Navigator.of(context).pop(),
+                        ),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          height: 20,
+                          child: Text(
+                            'Отправить новый код через 00:42',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: _SmsFigma.secondaryText,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Container(
+                          height: 116,
+                          decoration: const BoxDecoration(
+                            color: AppColors.soft,
+                            borderRadius: AppRadii.radius20,
+                          ),
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 24,
+                                child: Text(
+                                  'Не приходит SMS?',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.label.copyWith(
+                                    color: AppColors.brand,
+                                  ),
+                                ),
                               ),
-                            ),
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                height: 40,
+                                child: Text(
+                                  'Проверьте номер и дождитесь повторной отправки. Код можно вставить из SMS.',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: _SmsFigma.secondaryText,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            height: 40,
-                            child: Text(
-                              'Проверьте номер и дождитесь повторной отправки. Код можно вставить из SMS.',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: _SmsFigma.secondaryText,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -212,14 +258,12 @@ class _FigmaSmsField extends StatelessWidget {
   const _FigmaSmsField({
     required this.controller,
     this.errorText,
-    this.onChanged,
-    this.onSubmitted,
+    required this.onChanged,
   });
 
   final TextEditingController controller;
   final String? errorText;
-  final ValueChanged<String>? onChanged;
-  final ValueChanged<String>? onSubmitted;
+  final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -247,61 +291,34 @@ class _FigmaSmsField extends StatelessWidget {
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             alignment: Alignment.center,
-            child: Stack(
-              fit: StackFit.expand,
-              alignment: Alignment.centerLeft,
-              children: [
-                Positioned.fill(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: ValueListenableBuilder<TextEditingValue>(
-                      valueListenable: controller,
-                      builder: (context, value, _) {
-                        final code = value.text.trim();
-                        final text = code.isEmpty
-                            ? '1 2 3 4 5 6'
-                            : code.split('').join(' ');
-                        return SizedBox(
-                          height: 24,
-                          child: Text(
-                            text,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: _SmsFigma.inputText,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: Opacity(
-                    opacity: 0,
-                    child: TextField(
-                      controller: controller,
-                      keyboardType: TextInputType.number,
-                      textInputAction: TextInputAction.done,
-                      autofillHints: const [AutofillHints.oneTimeCode],
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(
-                          6,
-                          maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                        ),
-                      ],
-                      onChanged: onChanged,
-                      onSubmitted: onSubmitted,
-                      maxLines: 1,
-                      style: _SmsFigma.inputText,
-                      decoration: const InputDecoration(
-                        isCollapsed: true,
-                        border: InputBorder.none,
-                        hintText: '1 2 3 4 5 6',
-                      ),
-                    ),
-                  ),
-                ),
+            child: TextField(
+              key: const ValueKey('patient.sms.input'),
+              controller: controller,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.oneTimeCode],
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(6),
               ],
+              onChanged: onChanged,
+              maxLength: 6,
+              buildCounter:
+                  (
+                    context, {
+                    required currentLength,
+                    required isFocused,
+                    required maxLength,
+                  }) => null,
+              style: _SmsFigma.inputText.copyWith(letterSpacing: 9),
+              cursorColor: AppColors.brand,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+                counterText: '',
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -382,10 +399,15 @@ class _GradientHeadline extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShaderMask(
       blendMode: BlendMode.srcIn,
-      shaderCallback: (bounds) => AppGradients.brandHeader.createShader(bounds),
-      child: Text(
-        text,
-        style: AppTypography.title.copyWith(color: AppColors.brand),
+      shaderCallback: (bounds) => _SmsFigma.headlineGradient.createShader(
+        Rect.fromLTWH(0, 0, _SmsFigma.contentWidth, bounds.height),
+      ),
+      child: SizedBox(
+        width: _SmsFigma.contentWidth,
+        child: Text(
+          text,
+          style: AppTypography.title.copyWith(color: AppColors.brand),
+        ),
       ),
     );
   }
@@ -413,9 +435,7 @@ class _FigmaButton extends StatelessWidget {
         style: ButtonStyle(
           backgroundColor: WidgetStatePropertyAll(backgroundColor),
           foregroundColor: WidgetStatePropertyAll(textColor),
-          overlayColor: WidgetStatePropertyAll(
-            textColor.withValues(alpha: 0.08),
-          ),
+          overlayColor: const WidgetStatePropertyAll(Colors.transparent),
           shape: const WidgetStatePropertyAll(
             RoundedRectangleBorder(borderRadius: AppRadii.radius12),
           ),
@@ -439,6 +459,24 @@ class _FigmaButton extends StatelessWidget {
 
 abstract final class _SmsFigma {
   static const headerHeight = 56.0;
+  static const contentWidth = 345.0;
+  static const background = Color(0xFFF5F8FC);
+
+  static const headlineGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [
+      AppColors.brand,
+      AppColors.brand,
+      AppColors.sky,
+      Color(0xFFA46BD5),
+      AppColors.coral,
+      AppColors.accent,
+      AppColors.brand,
+      AppColors.brand,
+    ],
+    stops: [0, 0.13287, 0.21038, 0.26574, 0.32110, 0.36539, 0.46504, 0.55362],
+  );
 
   static final secondaryText = AppTypography.small.copyWith(
     color: AppColors.secondary,

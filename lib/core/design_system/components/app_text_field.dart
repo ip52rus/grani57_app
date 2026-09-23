@@ -10,6 +10,7 @@ class AppTextField extends StatelessWidget {
     required this.label,
     this.controller,
     this.hintText,
+    this.prefixText,
     this.errorText,
     this.enabled = true,
     this.keyboardType,
@@ -25,6 +26,7 @@ class AppTextField extends StatelessWidget {
   final String label;
   final TextEditingController? controller;
   final String? hintText;
+  final String? prefixText;
   final String? errorText;
   final bool enabled;
   final TextInputType? keyboardType;
@@ -56,12 +58,28 @@ class AppTextField extends StatelessWidget {
               keyboardType: keyboardType,
               textInputAction: textInputAction,
               autofillHints: autofillHints,
+              enableInteractiveSelection: false,
+              magnifierConfiguration: TextMagnifierConfiguration.disabled,
               inputFormatters: inputFormatters,
               onChanged: onChanged,
               onSubmitted: onSubmitted,
               style: AppTypography.body.copyWith(color: AppColors.text),
               decoration: InputDecoration(
                 hintText: hintText,
+                prefixIcon: prefixText == null
+                    ? null
+                    : Padding(
+                        padding: const EdgeInsets.only(left: 16),
+                        child: Text(
+                          prefixText!,
+                          style: AppTypography.body.copyWith(
+                            color: AppColors.text,
+                          ),
+                        ),
+                      ),
+                prefixIconConstraints: prefixText == null
+                    ? null
+                    : const BoxConstraints(minWidth: 0, minHeight: 0),
                 errorText: errorText,
                 hintStyle: AppTypography.body.copyWith(
                   color: AppColors.secondary,

@@ -1,49 +1,21 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
-import '../../core/design_system/components/app_button.dart';
-import '../../core/design_system/tokens/app_colors.dart';
-import '../../core/design_system/tokens/app_spacing.dart';
-import '../../core/design_system/typography/app_typography.dart';
+import '../../core/mock_runtime/demo_auth_service.dart';
+import '../../core/mock_runtime/demo_session_store.dart';
+import '../doctor_auth/doctor_login_screen.dart';
 
+/// Compatibility entry used by the existing patient-auth employee action.
 class EmployeeAuthPlaceholder extends StatelessWidget {
-  const EmployeeAuthPlaceholder({super.key});
+  const EmployeeAuthPlaceholder({
+    super.key,
+    this.authService,
+    this.sessionStore,
+  });
+
+  final DemoAuthService? authService;
+  final DemoSessionStore? sessionStore;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.pagePadding),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Employee authentication',
-                  textAlign: TextAlign.center,
-                  style: AppTypography.heading.copyWith(color: AppColors.text),
-                ),
-                const SizedBox(height: AppSpacing.x8),
-                Text(
-                  'Development placeholder',
-                  textAlign: TextAlign.center,
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.secondary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.x24),
-                AppButton(
-                  label: 'Назад',
-                  variant: AppButtonVariant.ghost,
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      DoctorLoginScreen(authService: authService, sessionStore: sessionStore);
 }

@@ -1,0 +1,32 @@
+{
+  "notifications": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 22956,
+    "changedPercentage": 6.855893631509157
+  },
+  "notifications_empty": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 8666,
+    "changedPercentage": 2.588132697798325
+  },
+  "notification_permission": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 39404,
+    "changedPercentage": 11.768149183480869
+  },
+  "notification_settings": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 23024,
+    "changedPercentage": 6.876202081018767
+  },
+  "notification_settings_denied": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 24718,
+    "changedPercentage": 7.3821213967434804
+  }
+}

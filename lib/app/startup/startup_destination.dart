@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../core/mock_runtime/demo_session.dart';
+import '../../core/mock_runtime/demo_session_store.dart';
 import '../../core/mock_runtime/user_role.dart';
 import '../../features/development_demo/patient_shell_placeholder.dart';
 import '../../features/development_demo/startup_placeholders.dart';
@@ -25,11 +26,28 @@ StartupDestination destinationForSession(DemoSession session) {
   };
 }
 
-Widget widgetForStartupDestination(StartupDestination destination) {
+Widget widgetForStartupDestination(
+  StartupDestination destination, {
+  DemoSession? session,
+  DemoSessionStore? sessionStore,
+}) {
   return switch (destination) {
-    StartupDestination.patientAuth => const PatientAuthPlaceholder(),
-    StartupDestination.patientShell => const PatientShellPlaceholder(),
-    StartupDestination.doctorShell => const DoctorShellPlaceholder(),
-    StartupDestination.administratorShell => const AdminShellPlaceholder(),
+    StartupDestination.patientAuth => PatientAuthPlaceholder(
+      sessionStore: sessionStore,
+    ),
+    StartupDestination.patientShell => PatientShellPlaceholder(
+      sessionStore: sessionStore,
+      patientId: session?.userId,
+      phone: session?.phone,
+      patientName: session?.name,
+    ),
+    StartupDestination.doctorShell => DoctorShellPlaceholder(
+      sessionStore: sessionStore,
+      doctorId: session?.userId,
+      doctorName: session?.name,
+    ),
+    StartupDestination.administratorShell => AdminShellPlaceholder(
+      sessionStore: sessionStore,
+    ),
   };
 }

@@ -1,0 +1,26 @@
+{
+  "login": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 20073,
+    "changedPercentage": 5.994875103035516
+  },
+  "sms": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 14126,
+    "changedPercentage": 4.218781731952359
+  },
+  "consent": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 42637,
+    "changedPercentage": 12.733696496195153
+  },
+  "new_patient_data": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 14913,
+    "changedPercentage": 4.453822169659176
+  }
+}

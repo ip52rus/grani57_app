@@ -1,0 +1,20 @@
+{
+  "doctor_schedule_with_appointments": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 172226,
+    "changedPercentage": 51.435926841797176
+  },
+  "doctor_appointment_detail": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 138589,
+    "changedPercentage": 41.39011336893285
+  },
+  "doctor_schedule_empty_day": {
+    "width": 393,
+    "height": 852,
+    "changedPixels": 171434,
+    "changedPercentage": 51.19939313574407
+  }
+}

@@ -4,7 +4,7 @@ import '../tokens/app_colors.dart';
 import '../tokens/app_radii.dart';
 import '../typography/app_typography.dart';
 
-enum AppButtonVariant { primary, secondary, ghost, danger }
+enum AppButtonVariant { primary, accent, secondary, ghost, danger }
 
 class AppButton extends StatelessWidget {
   const AppButton({
@@ -67,15 +67,14 @@ class AppButton extends StatelessWidget {
 
         return switch (variant) {
           AppButtonVariant.primary => AppColors.brand,
+          AppButtonVariant.accent => AppColors.accent,
           AppButtonVariant.secondary => AppColors.soft,
           AppButtonVariant.ghost => Colors.transparent,
           AppButtonVariant.danger => AppColors.error,
         };
       }),
       foregroundColor: WidgetStatePropertyAll(_foregroundColor),
-      overlayColor: WidgetStatePropertyAll(
-        _foregroundColor.withValues(alpha: 0.08),
-      ),
+      overlayColor: const WidgetStatePropertyAll(Colors.transparent),
       side: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.disabled)) {
           return const BorderSide(color: AppColors.border);
@@ -83,8 +82,9 @@ class AppButton extends StatelessWidget {
 
         return switch (variant) {
           AppButtonVariant.primary => BorderSide.none,
+          AppButtonVariant.accent => BorderSide.none,
           AppButtonVariant.secondary => const BorderSide(color: AppColors.soft),
-          AppButtonVariant.ghost => const BorderSide(color: AppColors.border),
+          AppButtonVariant.ghost => BorderSide.none,
           AppButtonVariant.danger => BorderSide.none,
         };
       }),
@@ -99,6 +99,7 @@ class AppButton extends StatelessWidget {
 
     return switch (variant) {
       AppButtonVariant.primary => AppColors.onBrand,
+      AppButtonVariant.accent => AppColors.onBrand,
       AppButtonVariant.secondary => AppColors.brand,
       AppButtonVariant.ghost => AppColors.brand,
       AppButtonVariant.danger => AppColors.onBrand,

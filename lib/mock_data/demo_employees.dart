@@ -8,6 +8,7 @@ abstract final class DemoEmployees {
     name: 'Анна Смирнова',
     role: UserRole.doctor,
     login: '+7 999 000-10-01',
+    username: 'anna.smirnova',
     phone: '+7 999 000-10-01',
     password: 'Doctor57!',
     photoAsset: DemoAssetPaths.doctorAnnaSmirnova,

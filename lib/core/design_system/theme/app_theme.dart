@@ -20,6 +20,13 @@ abstract final class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: colorScheme,
+      // Figma has no pressed grey fill. Keep tap semantics while leaving the
+      // visual state of cards and buttons unchanged across the application.
+      splashFactory: NoSplash.splashFactory,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      focusColor: Colors.transparent,
       scaffoldBackgroundColor: AppColors.background,
       fontFamily: AppTypography.fontFamily,
       textTheme: const TextTheme(
@@ -36,6 +43,30 @@ abstract final class AppTheme {
         foregroundColor: AppColors.text,
         elevation: 0,
         centerTitle: false,
+      ),
+      textSelectionTheme: const TextSelectionThemeData(
+        cursorColor: AppColors.brand,
+        selectionColor: Color(0x553F7FEE),
+        selectionHandleColor: AppColors.brand,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          minimumSize: const Size.fromHeight(52),
+          shape: const RoundedRectangleBorder(borderRadius: AppRadii.radius12),
+          textStyle: AppTypography.label,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.brand,
+          textStyle: AppTypography.label,
+        ),
+      ),
+      checkboxTheme: const CheckboxThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+        ),
+        side: BorderSide(color: AppColors.secondary),
       ),
       inputDecorationTheme: const InputDecorationTheme(
         filled: true,

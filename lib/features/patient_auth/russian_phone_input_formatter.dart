@@ -26,21 +26,43 @@ class RussianPhoneInputFormatter extends TextInputFormatter {
       digitsBeforeCursor = (digitsBeforeCursor - 1).clamp(0, digits.length);
     }
 
-    // Backspace/Delete on a mask separator must remove an adjacent digit
-    // instead of immediately restoring the separator and trapping the cursor.
+    // A native keyboard can report different cursor positions after it removes
+    // a formatting separator. Detect the removed character in the old text,
+    // rather than inferring it from that platform-specific cursor position.
+    // This lets Backspace move through the closing bracket and delete the
+    // third, second, and first code digits normally.
     if (digits == _digits(oldValue.text) &&
-        oldValue.selection.isCollapsed &&
         newValue.text.length == oldValue.text.length - 1) {
-      final backspace = oldValue.selection.extentOffset == cursor + 1;
-      final delete = oldValue.selection.extentOffset == cursor;
-      final index = backspace ? digitsBeforeCursor - 1 : digitsBeforeCursor;
-      if ((backspace || delete) && index >= 0 && index < digits.length) {
+      final removedOffset = _removedCharacterOffset(
+        oldValue.text,
+        newValue.text,
+      );
+      final removedCharacter = oldValue.text[removedOffset];
+      final digitsBeforeRemovedCharacter = _digits(
+        oldValue.text.substring(0, removedOffset),
+      ).length;
+      final isBackspace =
+          oldValue.selection.isCollapsed &&
+          oldValue.selection.extentOffset > removedOffset;
+      var index = isBackspace
+          ? digitsBeforeRemovedCharacter - 1
+          : digitsBeforeRemovedCharacter;
+      if (index >= digits.length) {
+        index = digits.length - 1;
+      }
+      if (_digits(removedCharacter).isEmpty &&
+          index >= 0 &&
+          index < digits.length) {
         digits = digits.replaceRange(index, index + 1, '');
-        if (backspace) digitsBeforeCursor--;
+        digitsBeforeCursor = isBackspace
+            ? digitsBeforeRemovedCharacter - 1
+            : digitsBeforeRemovedCharacter;
       }
     }
 
-    if (digits.length > 10) digits = digits.substring(0, 10);
+    if (digits.length > 10) {
+      digits = digits.substring(0, 10);
+    }
     final formatted = _formatLocalPhone(digits);
     final digitOffset = digitsBeforeCursor.clamp(0, digits.length);
     var offset = 0;
@@ -49,11 +71,22 @@ class RussianPhoneInputFormatter extends TextInputFormatter {
       if (_digits(formatted[offset]).isNotEmpty) count++;
       offset++;
     }
+    if (digitOffset == digits.length) {
+      offset = formatted.length;
+    }
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: offset),
     );
   }
+}
+
+int _removedCharacterOffset(String oldText, String newText) {
+  var offset = 0;
+  while (offset < newText.length && oldText[offset] == newText[offset]) {
+    offset++;
+  }
+  return offset;
 }
 
 /// Display helper for complete phone numbers, separate from editable text.
@@ -71,11 +104,24 @@ String formatRussianPhone(String value) {
 String _digits(String value) => value.replaceAll(RegExp(r'\D'), '');
 
 String _formatLocalPhone(String digits) {
+  if (digits.isEmpty) {
+    return '';
+  }
   final buffer = StringBuffer();
+  buffer.write('(');
   for (var i = 0; i < digits.length; i++) {
-    if (i == 3) buffer.write(' ');
-    if (i == 6 || i == 8) buffer.write('-');
+    if (i == 3) {
+      buffer
+        ..write(')')
+        ..write(' ');
+    }
+    if (i == 6 || i == 8) {
+      buffer.write('-');
+    }
     buffer.write(digits[i]);
+  }
+  if (digits.length == 3) {
+    buffer.write(')');
   }
   return buffer.toString();
 }

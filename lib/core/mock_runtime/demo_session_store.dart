@@ -9,6 +9,8 @@ class DemoSessionStore {
   static const _isAuthenticatedKey = 'demo_session.is_authenticated';
   static const _userIdKey = 'demo_session.user_id';
   static const _roleKey = 'demo_session.role';
+  static const _phoneKey = 'demo_session.phone';
+  static const _nameKey = 'demo_session.name';
 
   final SharedPreferences? preferences;
 
@@ -27,7 +29,12 @@ class DemoSessionStore {
         return const DemoSession.unauthenticated();
       }
 
-      return DemoSession.authenticated(userId: userId, role: role);
+      return DemoSession.authenticated(
+        userId: userId,
+        role: role,
+        phone: preferences.getString(_phoneKey),
+        name: preferences.getString(_nameKey),
+      );
     } catch (_) {
       await clearSession();
       return const DemoSession.unauthenticated();
@@ -52,6 +59,18 @@ class DemoSessionStore {
     await preferences.setBool(_isAuthenticatedKey, true);
     await preferences.setString(_userIdKey, userId);
     await preferences.setString(_roleKey, role.name);
+    final phone = session.phone;
+    if (phone == null) {
+      await preferences.remove(_phoneKey);
+    } else {
+      await preferences.setString(_phoneKey, phone);
+    }
+    final name = session.name;
+    if (name == null) {
+      await preferences.remove(_nameKey);
+    } else {
+      await preferences.setString(_nameKey, name);
+    }
   }
 
   Future<void> clearSession() async {
@@ -59,6 +78,8 @@ class DemoSessionStore {
     await preferences.remove(_isAuthenticatedKey);
     await preferences.remove(_userIdKey);
     await preferences.remove(_roleKey);
+    await preferences.remove(_phoneKey);
+    await preferences.remove(_nameKey);
   }
 
   Future<SharedPreferences> _getPreferences() async {

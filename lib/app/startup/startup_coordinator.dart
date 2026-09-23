@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/navigation/app_page_route.dart';
 import '../../core/mock_runtime/demo_session.dart';
 import '../../core/mock_runtime/demo_session_store.dart';
 import 'splash_screen.dart';
@@ -64,8 +65,13 @@ class _StartupCoordinatorState extends State<StartupCoordinator> {
     final session = results.first as DemoSession;
     final destination = destinationForSession(session);
     await Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (_) => widgetForStartupDestination(destination),
+      appPageRoute<void>(
+        context,
+        builder: (_) => widgetForStartupDestination(
+          destination,
+          session: session,
+          sessionStore: _sessionStore,
+        ),
       ),
     );
   }

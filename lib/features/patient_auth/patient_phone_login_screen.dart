@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../core/design_system/gradients/app_gradients.dart';
+import '../../core/navigation/app_page_route.dart';
 import '../../core/design_system/tokens/app_colors.dart';
 import '../../core/design_system/tokens/app_radii.dart';
-import '../../core/design_system/tokens/app_spacing.dart';
 import '../../core/design_system/typography/app_typography.dart';
 import '../../core/mock_runtime/demo_auth_service.dart';
 import '../../core/mock_runtime/demo_session_store.dart';
-import '../../mock_data/demo_asset_paths.dart';
 import '../development_demo/employee_auth_placeholder.dart';
+import 'patient_consent_screen.dart';
 import 'patient_sms_code_screen.dart';
 import 'russian_phone_input_formatter.dart';
 
@@ -32,9 +32,10 @@ class _PatientPhoneLoginScreenState extends State<PatientPhoneLoginScreen> {
   late final DemoAuthService _authService;
   late final DemoSessionStore _sessionStore;
   final _phoneController = TextEditingController();
+  final _phoneFormatter = RussianPhoneInputFormatter();
   bool _isSubmitting = false;
+  bool _hasAcceptedConsent = false;
   String? _phoneError;
-  bool _showUnknownPatientState = false;
 
   @override
   void initState() {
@@ -59,7 +60,6 @@ class _PatientPhoneLoginScreenState extends State<PatientPhoneLoginScreen> {
     if (localDigits.length != 10) {
       setState(() {
         _phoneError = 'Введите номер телефона';
-        _showUnknownPatientState = false;
       });
       return;
     }
@@ -67,25 +67,18 @@ class _PatientPhoneLoginScreenState extends State<PatientPhoneLoginScreen> {
     setState(() {
       _isSubmitting = true;
       _phoneError = null;
-      _showUnknownPatientState = false;
     });
 
     final phone = '+7 ${_phoneController.text}';
     final lookup = _authService.lookupPatientByPhone(phone);
-    if (!lookup.isRegistered || lookup.patient == null) {
-      setState(() {
-        _isSubmitting = false;
-        _showUnknownPatientState = true;
-      });
-      return;
-    }
-
     Navigator.of(context)
         .push(
-          MaterialPageRoute<void>(
+          appPageRoute<void>(
+            context,
             builder: (_) => PatientSmsCodeScreen(
               phone: phone,
-              patientId: lookup.patient!.id,
+              patientId: lookup.patient?.id,
+              isNewPatient: !lookup.isRegistered,
               authService: _authService,
               sessionStore: _sessionStore,
             ),
@@ -100,115 +93,126 @@ class _PatientPhoneLoginScreenState extends State<PatientPhoneLoginScreen> {
 
   void _openEmployeePlaceholder() {
     Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const EmployeeAuthPlaceholder()),
+      appPageRoute<void>(
+        context,
+        builder: (_) => EmployeeAuthPlaceholder(sessionStore: _sessionStore),
+      ),
     );
+  }
+
+  void _openConsentDocument() {
+    Navigator.of(context).push(
+      appPageRoute<void>(context, builder: (_) => const PatientConsentScreen()),
+    );
+  }
+
+  void _clearPhoneState() {
+    if (_phoneError != null) {
+      setState(() => _phoneError = null);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final statusHeight = MediaQuery.paddingOf(context).top;
     final contentHeight =
         MediaQuery.sizeOf(context).height -
-        statusHeight -
+        _AuthFigma.statusHeight -
         _AuthFigma.headerHeight;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          SizedBox(height: statusHeight),
-          _AuthHeader(
-            title: 'Вход и регистрация',
-            onBack: Navigator.of(context).canPop()
-                ? () => Navigator.of(context).pop()
-                : null,
-          ),
-          SizedBox(
-            height: contentHeight,
-            child: SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: SvgPicture.asset(
-                        DemoAssetPaths.logoPrimary,
-                        width: 140,
-                        height: 40.13,
+    return ClipRRect(
+      borderRadius: AppRadii.radius28,
+      child: Scaffold(
+        backgroundColor: _AuthFigma.background,
+        body: MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.noScaling),
+          child: Column(
+            children: [
+              const SizedBox(height: _AuthFigma.statusHeight),
+              const _AuthHeader(title: 'Вход и регистрация'),
+              SizedBox(
+                height: contentHeight,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: FocusManager.instance.primaryFocus?.unfocus,
+                  onVerticalDragStart: (_) =>
+                      FocusManager.instance.primaryFocus?.unfocus(),
+                  child: SingleChildScrollView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: SvgPicture.asset(
+                              _AuthFigma.logoAsset,
+                              width: 140,
+                              height: 40.13,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const SizedBox(
+                            height: 72,
+                            child: _GradientHeadline(),
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            height: 40,
+                            child: Text(
+                              'Войдите или создайте аккаунт\nпо номеру телефона.',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: _AuthFigma.secondaryText,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _FigmaPhoneField(
+                            controller: _phoneController,
+                            formatter: _phoneFormatter,
+                            errorText: _phoneError,
+                            onChanged: (_) => _clearPhoneState(),
+                          ),
+                          const SizedBox(height: 16),
+                          _ConsentRow(
+                            isAccepted: _hasAcceptedConsent,
+                            onChanged: (value) {
+                              setState(() => _hasAcceptedConsent = value);
+                            },
+                            onOpenDocument: _openConsentDocument,
+                          ),
+                          const SizedBox(height: 16),
+                          _FigmaButton(
+                            label: 'Получить код',
+                            backgroundColor: _hasAcceptedConsent
+                                ? AppColors.brand
+                                : AppColors.soft,
+                            textColor: _hasAcceptedConsent
+                                ? AppColors.onBrand
+                                : AppColors.secondary,
+                            onPressed: _isSubmitting || !_hasAcceptedConsent
+                                ? null
+                                : _submitPhone,
+                          ),
+                          const SizedBox(height: 16),
+                          _FigmaButton(
+                            label: 'Вход для сотрудников',
+                            backgroundColor: AppColors.surface,
+                            textColor: AppColors.brand,
+                            onPressed: _openEmployeePlaceholder,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    const SizedBox(
-                      height: 72,
-                      child: _GradientHeadline(
-                        'Сохраняя здоровье\nВаших зубов.',
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      height: 40,
-                      child: Text(
-                        'Войдите или создайте аккаунт\nпо номеру телефона.',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: _AuthFigma.secondaryText,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _FigmaPhoneField(
-                      controller: _phoneController,
-                      errorText: _phoneError,
-                      onChanged: (_) {
-                        if (_phoneError != null || _showUnknownPatientState) {
-                          setState(() {
-                            _phoneError = null;
-                            _showUnknownPatientState = false;
-                          });
-                        }
-                      },
-                      onSubmitted: (_) => _submitPhone(),
-                    ),
-                    if (_showUnknownPatientState) ...[
-                      const SizedBox(height: AppSpacing.x8),
-                      Text(
-                        'Регистрация нового пациента будет реализована следующим этапом',
-                        style: AppTypography.small.copyWith(
-                          color: AppColors.secondary,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 16),
-                    const _ConsentRow(),
-                    const SizedBox(height: 16),
-                    _FigmaButton(
-                      label: 'Получить код',
-                      backgroundColor: AppColors.soft,
-                      textColor: AppColors.secondary,
-                      onPressed: _isSubmitting ? null : _submitPhone,
-                    ),
-                    const SizedBox(height: 16),
-                    _FigmaButton(
-                      label: 'Контакты клиник',
-                      backgroundColor: AppColors.soft,
-                      textColor: AppColors.brand,
-                      onPressed: () {},
-                    ),
-                    const SizedBox(height: 16),
-                    _FigmaButton(
-                      label: 'Вход для сотрудников',
-                      backgroundColor: AppColors.surface,
-                      textColor: AppColors.brand,
-                      onPressed: _openEmployeePlaceholder,
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -217,15 +221,15 @@ class _PatientPhoneLoginScreenState extends State<PatientPhoneLoginScreen> {
 class _FigmaPhoneField extends StatelessWidget {
   const _FigmaPhoneField({
     required this.controller,
+    required this.formatter,
     this.errorText,
-    this.onChanged,
-    this.onSubmitted,
+    required this.onChanged,
   });
 
   final TextEditingController controller;
+  final TextInputFormatter formatter;
   final String? errorText;
-  final ValueChanged<String>? onChanged;
-  final ValueChanged<String>? onSubmitted;
+  final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -245,59 +249,41 @@ class _FigmaPhoneField extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Container(
+            key: const ValueKey('patient.phone.field.surface'),
             height: 56,
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: AppRadii.radius12,
-              border: Border.all(color: AppColors.border),
+              border: Border.all(
+                color: errorText == null ? AppColors.border : AppColors.error,
+              ),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             alignment: Alignment.center,
-            child: Stack(
-              fit: StackFit.expand,
-              alignment: Alignment.centerLeft,
+            child: Row(
               children: [
-                Positioned.fill(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: ValueListenableBuilder<TextEditingValue>(
-                      valueListenable: controller,
-                      builder: (context, value, _) {
-                        final localPhone = value.text.trim();
-                        final text = localPhone.isEmpty
-                            ? '+7 (921) 000-00-00'
-                            : '+7 $localPhone';
-                        return SizedBox(
-                          height: 24,
-                          child: Text(
-                            text,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: _AuthFigma.inputText,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: Opacity(
-                    opacity: 0,
-                    child: TextField(
-                      controller: controller,
-                      keyboardType: TextInputType.phone,
-                      textInputAction: TextInputAction.done,
-                      autofillHints: const [AutofillHints.telephoneNumber],
-                      inputFormatters: [RussianPhoneInputFormatter()],
-                      onChanged: onChanged,
-                      onSubmitted: onSubmitted,
-                      maxLines: 1,
-                      style: _AuthFigma.inputText,
-                      decoration: InputDecoration(
-                        isCollapsed: true,
-                        border: InputBorder.none,
-                        hintText: '(921) 000-00-00',
+                Text('+7 ', style: _AuthFigma.inputText),
+                Expanded(
+                  child: TextField(
+                    key: const ValueKey('patient.phone.input'),
+                    controller: controller,
+                    keyboardType: TextInputType.phone,
+                    textInputAction: TextInputAction.done,
+                    autofillHints: const [AutofillHints.telephoneNumber],
+                    inputFormatters: [formatter],
+                    onChanged: onChanged,
+                    style: _AuthFigma.inputText,
+                    cursorColor: AppColors.brand,
+                    decoration: InputDecoration(
+                      hintText: '(___) ___-__-__',
+                      hintStyle: _AuthFigma.inputText.copyWith(
+                        color: AppColors.secondary,
                       ),
+                      isDense: true,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
                     ),
                   ),
                 ),
@@ -325,7 +311,15 @@ class _FigmaPhoneField extends StatelessWidget {
 }
 
 class _ConsentRow extends StatelessWidget {
-  const _ConsentRow();
+  const _ConsentRow({
+    required this.isAccepted,
+    required this.onChanged,
+    required this.onOpenDocument,
+  });
+
+  final bool isAccepted;
+  final ValueChanged<bool> onChanged;
+  final VoidCallback onOpenDocument;
 
   @override
   Widget build(BuildContext context) {
@@ -335,28 +329,59 @@ class _ConsentRow extends StatelessWidget {
         children: [
           SizedBox.square(
             dimension: 44,
-            child: Center(
-              child: Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: AppColors.secondary),
+            child: TextButton(
+              key: const ValueKey('patient.consent.checkbox'),
+              onPressed: () => onChanged(!isAccepted),
+              style: const ButtonStyle(
+                padding: WidgetStatePropertyAll(EdgeInsets.zero),
+                minimumSize: WidgetStatePropertyAll(Size.zero),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Center(
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: isAccepted ? AppColors.brand : AppColors.surface,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: isAccepted ? AppColors.brand : AppColors.secondary,
+                    ),
+                  ),
+                  child: isAccepted
+                      ? const Center(
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CustomPaint(painter: _ConsentCheckPainter()),
+                          ),
+                        )
+                      : null,
                 ),
               ),
             ),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: SizedBox(
-              height: 40,
-              child: Text(
-                'Согласен на обработку\nперсональных данных',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: _AuthFigma.secondaryText.copyWith(
-                  color: AppColors.brand,
+            child: TextButton(
+              key: const ValueKey('patient.consent.document'),
+              onPressed: onOpenDocument,
+              style: const ButtonStyle(
+                alignment: Alignment.centerLeft,
+                padding: WidgetStatePropertyAll(EdgeInsets.zero),
+                minimumSize: WidgetStatePropertyAll(Size.zero),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: SizedBox(
+                height: 40,
+                child: Text(
+                  'Согласен на обработку\nперсональных данных',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: _AuthFigma.secondaryText.copyWith(
+                    color: AppColors.brand,
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
               ),
             ),
@@ -367,11 +392,34 @@ class _ConsentRow extends StatelessWidget {
   }
 }
 
+class _ConsentCheckPainter extends CustomPainter {
+  const _ConsentCheckPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.onBrand
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.7
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    canvas.drawPath(
+      Path()
+        ..moveTo(size.width * (4.16663 / 20), size.height * (10 / 20))
+        ..lineTo(size.width * (7.49996 / 20), size.height * (13.3333 / 20))
+        ..lineTo(size.width * (15.8333 / 20), size.height * (5 / 20)),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _ConsentCheckPainter oldDelegate) => false;
+}
+
 class _AuthHeader extends StatelessWidget {
-  const _AuthHeader({required this.title, this.onBack});
+  const _AuthHeader({required this.title});
 
   final String title;
-  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -379,37 +427,17 @@ class _AuthHeader extends StatelessWidget {
       height: _AuthFigma.headerHeight,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Row(
-          children: [
-            SizedBox.square(
-              dimension: 44,
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                tooltip: 'Назад',
-                onPressed: onBack,
-                icon: Transform.translate(
-                  offset: const Offset(-10, 0),
-                  child: SvgPicture.asset(
-                    DemoAssetPaths.back,
-                    width: 24,
-                    height: 24,
-                  ),
-                ),
-              ),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            height: 24,
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.label.copyWith(color: AppColors.brand),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: SizedBox(
-                height: 24,
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.label.copyWith(color: AppColors.brand),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -417,18 +445,49 @@ class _AuthHeader extends StatelessWidget {
 }
 
 class _GradientHeadline extends StatelessWidget {
-  const _GradientHeadline(this.text);
+  const _GradientHeadline();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: _AuthFigma.contentWidth,
+      height: _AuthFigma.headlineHeight,
+      child: Column(
+        children: [
+          _GradientHeadlineLine(
+            text: 'Сохраняя здоровье',
+            gradient: _AuthFigma.firstHeadlineLineGradient,
+          ),
+          _GradientHeadlineLine(
+            text: 'Ваших зубов.',
+            gradient: _AuthFigma.secondHeadlineLineGradient,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GradientHeadlineLine extends StatelessWidget {
+  const _GradientHeadlineLine({required this.text, required this.gradient});
 
   final String text;
+  final LinearGradient gradient;
 
   @override
   Widget build(BuildContext context) {
     return ShaderMask(
       blendMode: BlendMode.srcIn,
-      shaderCallback: (bounds) => AppGradients.brandHeader.createShader(bounds),
-      child: Text(
-        text,
-        style: AppTypography.title.copyWith(color: AppColors.brand),
+      shaderCallback: (bounds) => gradient.createShader(
+        Rect.fromLTWH(0, 0, _AuthFigma.contentWidth, bounds.height),
+      ),
+      child: SizedBox(
+        width: _AuthFigma.contentWidth,
+        height: _AuthFigma.headlineLineHeight,
+        child: Text(
+          text,
+          style: AppTypography.title.copyWith(color: AppColors.brand),
+        ),
       ),
     );
   }
@@ -456,9 +515,7 @@ class _FigmaButton extends StatelessWidget {
         style: ButtonStyle(
           backgroundColor: WidgetStatePropertyAll(backgroundColor),
           foregroundColor: WidgetStatePropertyAll(textColor),
-          overlayColor: WidgetStatePropertyAll(
-            textColor.withValues(alpha: 0.08),
-          ),
+          overlayColor: const WidgetStatePropertyAll(Colors.transparent),
           shape: const WidgetStatePropertyAll(
             RoundedRectangleBorder(borderRadius: AppRadii.radius12),
           ),
@@ -481,7 +538,45 @@ class _FigmaButton extends StatelessWidget {
 }
 
 abstract final class _AuthFigma {
+  static const statusHeight = 44.0;
   static const headerHeight = 56.0;
+  static const contentWidth = 345.0;
+  static const headlineLineHeight = 36.0;
+  static const headlineHeight = 72.0;
+  static const background = Color(0xFFF5F8FC);
+  static const logoAsset = 'assets/icons/brand/logo_primary_clean.svg';
+
+  static const firstHeadlineLineGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [
+      AppColors.brand,
+      AppColors.brand,
+      AppColors.sky,
+      Color(0xFFA46BD5),
+      AppColors.coral,
+      AppColors.accent,
+      AppColors.brand,
+      AppColors.brand,
+    ],
+    stops: [0, 0.21287, 0.33704, 0.42574, 0.51443, 0.58539, 0.74504, 0.88696],
+  );
+
+  static const secondHeadlineLineGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [
+      AppColors.brand,
+      AppColors.brand,
+      AppColors.sky,
+      Color(0xFFA46BD5),
+      AppColors.coral,
+      AppColors.accent,
+      AppColors.brand,
+      AppColors.brand,
+    ],
+    stops: [0, 0.14122, 0.22359, 0.28243, 0.34128, 0.38835, 0.49426, 0.58841],
+  );
 
   static final secondaryText = AppTypography.small.copyWith(
     color: AppColors.secondary,
