@@ -2,86 +2,245 @@
 
 ## Назначение и приоритеты
 
-`57 ГРАНЕЙ` — Flutter demo-приложение стоматологических клиник для пациентов,
-врачей и администраторов. Текущий полноценно проработанный контур — patient demo.
+`57 ГРАНЕЙ` — Flutter demo-приложение стоматологических клиник для iOS и
+Android с тремя пользовательскими контурами:
+
+- Patient;
+- Doctor;
+- Administrator.
+
+Patient и Doctor flows в основном реализованы. Administrator flow находится
+в активной разработке и требует завершения и финальной проверки.
 
 При конфликте источников применять такой порядок:
 
 1. Последняя явная инструкция владельца проекта.
 2. `docs/product_decisions.md` для продуктовой логики.
 3. `docs/codex/CURRENT_STATE.md` для фактического состояния реализации.
-4. Figma для визуала конкретного экрана.
-5. Apple HIG / Google Material для поведения и физики взаимодействий.
+4. `docs/codex/SCREEN_INDEX.md` для связи Figma ↔ Flutter ↔ visual fixtures.
+5. Figma для визуала конкретного экрана.
+6. Apple HIG / Google Material для поведения и физики взаимодействий.
 
-Старые `docs/architecture.md` и `docs/implementation_plan.md` описывают ранний
-foundation-этап и могут отставать от текущего кода.
+Старые `docs/architecture.md` и `docs/implementation_plan.md` относятся к
+раннему foundation-этапу и могут отставать от текущего кода.
 
 ## Технологии
 
-- Flutter, Dart `^3.12.2`, MaterialApp с общим design system.
-- Платформы: iOS и Android; portrait orientation.
+- Flutter / Dart.
+- iOS и Android.
+- Portrait orientation.
 - Application id / bundle id: `ru.g57.app`.
-- Навигация: Flutter Navigator и локальный `appPageRoute`; стороннего router нет.
-- Шрифт: Manrope 400/500/600 из `assets/fonts/`.
-- Основные пакеты: `flutter_svg`, `shared_preferences`, `permission_handler`,
-  `url_launcher`, `yandex_maps_mapkit_lite`, `pdf`, `printing`.
+- Flutter Navigator и локальный `appPageRoute`; сторонний router не используется.
+- Manrope 400/500/600 из `assets/fonts/`.
+- Figma как основной источник UI/UX.
+- Yandex MapKit.
+- Local mock/demo runtime.
+- Widget / behavioral / golden tests.
+- Visual comparison tooling.
 
-## Структура
+Основные Flutter packages включают:
 
-- `lib/app/` — bootstrap, Splash, startup routing и role destinations.
+- `flutter_svg`;
+- `shared_preferences`;
+- `permission_handler`;
+- `url_launcher`;
+- `yandex_maps_mapkit_lite`;
+- `pdf`;
+- `printing`.
+
+## Структура проекта
+
+- `lib/app/` — bootstrap, Splash и startup routing.
 - `lib/core/design_system/` — tokens, theme, typography и общие компоненты.
-- `lib/core/navigation/` — единый platform-aware route/back-swipe foundation.
-- `lib/core/maps/` — MapKit initialization и внешние маршруты.
-- `lib/core/mock_runtime/` — demo authentication/session persistence.
-- `lib/mock_data/` — локальные demo fixtures и состояния пациентов.
-- `lib/features/` — экраны по patient flow; doctor/admin пока заглушки.
-- `docs/figma_reference/` — локальные Figma reference PNG.
-- `docs/visual_tests/` — Flutter renders, overlays, diffs и отдельные metrics.
-- `test/` — behavior/input/widget и golden fixtures.
-- `tool/visual_diff.dart` — локальное сравнение reference и render.
+- `lib/core/navigation/` — platform-aware navigation foundation.
+- `lib/core/maps/` — MapKit initialization и external navigation.
+- `lib/core/mock_runtime/` — demo authentication, sessions и runtime state.
+- `lib/mock_data/` — локальные demo fixtures.
+- `lib/features/patient_*` — Patient flows.
+- `lib/features/doctor_auth/` — employee / doctor authentication.
+- `lib/features/doctor_schedule/` — Doctor Cabinet.
+- `lib/features/admin/` — Administrator flow.
+- `docs/figma_reference/` — локальные Figma reference images.
+- `docs/figma_specs/` — компактные specs для реализуемых flows.
+- `docs/visual_tests/` — renders, overlays, diffs и metrics.
+- `test/` — behavioral, widget и golden tests.
+- `tool/visual_diff.dart` — локальное визуальное сравнение.
 
 ## Design system и поведение
 
-- Визуал сохраняет утверждённую Figma-композицию и Manrope.
-- Поведение строится на стандартных Flutter/Cupertino/Material primitives.
-- Общие кнопки, поля, checkbox, numeric keypad, navigation shell и back swipe
-  переиспользуются; их не копируют по экранам.
-- Back swipe доступен на экранах с предыдущим route и начинается в левых 40%.
-- Numeric input использует проектную keypad без selection/scanning/context menu.
+- Figma является визуальным source of truth.
 - Canonical viewport visual fixtures: `393 × 852`.
+- Используется общий дизайн-системный слой вместо копирования UI по экранам.
+- Общие кнопки, поля, navigation shell и другие primitives переиспользуются.
+- Поведение строится на Flutter / Cupertino / Material primitives.
+- Visual diff используется как вспомогательная проверка.
+- Финальный visual approval выполняется после проверки на реальном устройстве.
 
-## Demo runtime
+## Patient demo
 
-- Splash параллельно показывает утверждённую анимацию и восстанавливает session.
-- Patient auth: телефон, локальный SMS, consent и регистрация нового пациента.
-- Три зарегистрированных пациента и локальные коды находятся в
-  `lib/mock_data/demo_patients.dart`.
-- Session хранит минимальные `userId`, role, phone и name в
-  `shared_preferences`; это не production authentication.
-- Patient flows: home/news, booking, appointments, clinics, documents,
-  notifications и profile/sign-out.
-- Doctor и administrator routes существуют как временные placeholders.
-- Payments/receipts отсутствуют по продуктовому решению.
-- Реального backend, MIS/Dental For Windows, APNs/FCM и production patient data
-  пока нет.
+Реализованы основные Patient flows:
+
+- Splash и startup routing;
+- вход по номеру телефона;
+- согласие на обработку данных;
+- SMS confirmation;
+- регистрация нового пациента;
+- Home;
+- news;
+- booking;
+- appointments;
+- clinics;
+- Yandex MapKit;
+- external navigation;
+- documents;
+- PDF preview;
+- notifications;
+- profile;
+- sign-out.
+
+Данные работают через локальный demo runtime.
+
+## Doctor demo
+
+Реализован Doctor Cabinet:
+
+- вход через общую точку «Вход для сотрудников»;
+- role-based authentication;
+- doctor session;
+- персональное расписание;
+- календарь;
+- список записей;
+- карточка приёма пациента;
+- empty-day state;
+- сохранение выбранного контекста при навигации.
+
+Врач связан с demo runtime через стабильный `doctorId`.
+
+## Administrator demo
+
+Administrator flow находится в активной разработке.
+
+Текущая реализация включает:
+
+- role-based переход из employee login;
+- admin shell;
+- управление врачами;
+- управление доступом врачей в приложение;
+- создание и изменение demo credentials;
+- enable / disable doctor access;
+- publications management.
+
+Doctor access хранится отдельно от отображаемых данных врача и связан с
+врачом через стабильный `doctorId`.
+
+Admin flow ещё требует завершения, visual QA и device QA.
+
+## Demo runtime и authentication
+
+Production backend пока отсутствует намеренно.
+
+Используются локальные demo:
+
+- patients;
+- doctor;
+- administrator;
+- appointments;
+- schedule;
+- employee credentials;
+- sessions;
+- doctor access state.
+
+Session содержит только данные, необходимые для demo-routing и отображения.
+
+Demo credentials не являются production authentication и не должны
+использоваться как модель безопасного хранения паролей.
+
+В production предполагается backend authentication и связь employee account
+со стабильным doctor/user identifier.
+
+## Backend
+
+Backend является отдельным следующим крупным этапом после стабилизации UI/UX.
+
+Предполагаемое направление:
+
+- API;
+- production database;
+- authentication;
+- sessions;
+- roles and permissions;
+- patients;
+- doctors;
+- appointments;
+- schedule;
+- notifications;
+- integration с внешней медицинской системой при необходимости.
+
+Конкретный backend stack пока не зафиксирован окончательно.
 
 ## Figma и локальные источники
 
-- Figma file key: `9cE8OJQvicM0aQa0TOdDtc`.
-- Patient page: `01 · Пациент`, node `4:2`.
-- Точные известные nodes и локальные файлы перечислены в
-  `docs/codex/SCREEN_INDEX.md`.
-- Экспортированные assets описаны в `docs/assets_manifest.md`.
-- Не запрашивать Figma node повторно, если нужная геометрия уже записана в
-  локальном spec или проверяется reference PNG.
+Figma file:
 
-## Локальная конфигурация
+`9cE8OJQvicM0aQa0TOdDtc`
 
-Live Yandex Map получает `MAPKIT_API_KEY` через Dart define. Локальный файл
-`.mapkit.env` исключён из Git:
+Основные страницы проекта содержат Patient, Doctor и Administrator flows,
+компоненты и состояния интерфейса.
 
-```bash
-flutter run --release --dart-define-from-file=.mapkit.env -d <device-id>
+Точные известные node IDs и соответствия Flutter-файлам находятся в:
+
+`docs/codex/SCREEN_INDEX.md`
+
+Если данные конкретного экрана уже сохранены в локальном spec/reference,
+повторный запрос Figma MCP не требуется.
+
+## Карты
+
+Live Yandex Map использует `MAPKIT_API_KEY`, передаваемый через Dart define.
+
+Локальный файл:
+
+```text
+.mapkit.env
 ```
 
-Никогда не помещать ключ в Dart, Markdown, логи или final report.
+исключён из Git.
+
+Пример запуска:
+
+```bash
+flutter run --release \
+  --dart-define-from-file=.mapkit.env \
+  -d <device-id>
+```
+
+Настоящий API key нельзя помещать в Dart, Markdown, логи, commits или
+публичный GitHub.
+
+## Тестирование
+
+Во время разработки предпочтительны targeted tests для изменяемого flow.
+
+После завершения логического блока:
+
+```bash
+dart format .
+flutter analyze
+flutter test
+```
+
+Проект также использует:
+
+- Figma reference PNG;
+- golden fixtures;
+- overlays;
+- visual diff;
+- проверки на реальных iOS и Android устройствах.
+
+## Рабочий принцип
+
+Разработка ведётся небольшими связанными flow:
+
+**Figma context → Flutter UI → visual QA → interaction/navigation → targeted tests → device QA → commit**
+
+Не расширять scope на несвязанные части приложения без необходимости.

@@ -1,65 +1,77 @@
 # Текущее состояние
 
-Снимок: 2026-09-22. Branch `main`, последний commit
-`1baf575 style: match patient auth screens to figma` (2026-09-13).
+Снимок: 2026-09-25. Branch `main`.
+
+Актуальные контрольные commits:
+
+- `ff2fc24 chore: optimize Codex project context`
+- `1dcdd12 wip: checkpoint current demo development`
+- `d1efd9e docs: improve portfolio README`
 
 ## Реализовано в patient demo
 
-- Splash, restoreSession и role-based replacement routing.
-- Login, consent, SMS, новый пациент и локальная demo session.
+- Splash, restoreSession и role-based startup routing.
+- Login, consent, SMS, регистрация нового пациента и локальная demo session.
 - Общий patient shell с Home, Приёмы, Документы, Клиники и Профиль.
-- Три состояния Home, news carousel и два news detail screen.
-- Booking: клиника, услуга/врач, календарь/время, подтверждение и три результата.
+- Несколько состояний Home, news carousel и detail screens.
+- Booking flow: клиника, услуга/врач, календарь/время, подтверждение и результаты.
 - Приёмы: upcoming/empty/history, детали, отмена, перенос и success.
-- Клиники: live Yandex Map, две точки и external route provider fallback.
-- Документы: список заключений, detail, локальная PDF preview/download.
-- Профиль: данные текущей session и выход.
-- Уведомления: inbox/empty, contextual permission education, settings,
-  denied-state переход в system settings и deep links к demo content.
+- Клиники: Yandex MapKit, точки клиник и external route provider fallback.
+- Документы: список заключений, detail и локальная PDF preview/download.
+- Профиль текущего пациента и выход.
+- Уведомления: inbox/empty, permission education, settings и deep links.
 - Общая адаптивная навигация, back swipe, numeric keypad и design system.
 
 ## Реализовано в doctor demo
 
-- Вход врача из существующей точки «Вход для сотрудников» с проверкой роли.
-- Сохранение и восстановление doctor session через общий mock runtime.
-- Расписание Анны Смирновой: календарь, рабочий день, записи и local refresh.
-- Model-driven карточка записи пациента и возврат с сохранением даты.
-- Пустая дата как inline-состояние расписания без отдельного экрана; выход из
-  doctor session доступен в шапке.
-- Статусы вынесены в цветные метки карточек расписания: подтверждённый приём
-  зелёный, завершённый красный; экран записи пациента статус не повторяет.
+- Вход врача из общей точки «Вход для сотрудников».
+- Role-based employee authentication.
+- Сохранение и восстановление doctor session.
+- Персональное расписание врача.
+- Календарь и выбор даты.
+- Список записей.
+- Model-driven карточка записи пациента.
+- Empty-day state.
+- Demo doctor access связан со стабильным `doctorId`.
 
-## Последняя завершённая работа
+## Administrator demo
 
-Doctor Cabinet реализован по четырём Figma frames. Targeted behavioral и visual
-tests добавлены.
+Реализуется отдельный administrator flow.
 
-- `flutter analyze` — без замечаний;
-- targeted doctor/auth/navigation/visual tests — 79 tests passed;
-- полный `flutter test` — 132 tests passed.
+Текущая структура включает:
 
-Телефонная проверка Doctor Cabinet и возможные визуальные коррекции остаются
-следующим шагом владельца. Native builds в этой задаче не запускались.
+- общий employee login с role-based routing;
+- admin shell;
+- список врачей;
+- управление данными врачей;
+- управление доступом врача в приложение;
+- demo login/password для врача;
+- включение и отключение доступа;
+- публикации и связанные CRUD-состояния.
 
-## Не завершено
+Admin flow ещё требует завершения, visual QA и проверки связанных состояний.
 
-- Administrator app: только routing placeholder.
-- Production backend/MIS, реальные SMS/auth, remote appointment data.
-- APNs/FCM remote delivery и server-side notification events.
-- Production storage/security/privacy hardening.
-- Полная device QA всех patient screens после объединения текущего dirty tree.
+## Demo runtime
 
-## Текущие ограничения
+В текущей версии backend отсутствует.
 
-- Большой working tree содержит незакоммиченные изменения многих завершённых
-  patient flows. Нельзя clean/reset/revert/stash или менять unrelated файлы.
-- Часть старых foundation docs устарела; этот файл и фактический код новее.
-- Visual diff metrics нельзя считать approval: финальное решение принимает
-  владелец после проверки на реальном устройстве.
-- Live map требует приватный `MAPKIT_API_KEY` из `.mapkit.env`.
-- Demo fixtures не являются медицинскими или production данными.
+Используются локальные mock/demo данные:
 
-## Следующее действие
+- demo patients;
+- doctor;
+- administrator;
+- расписание;
+- записи;
+- локальные session state;
+- doctor access configuration.
 
-После device QA корректировать только найденный flow. Если patient demo принят,
-следующий отдельный этап — administrator scope после явного задания.
+Demo credentials не являются production credentials.
+
+## Карты
+
+Используется Yandex MapKit.
+
+API key передаётся через:
+
+```text
+MAPKIT_API_KEY
