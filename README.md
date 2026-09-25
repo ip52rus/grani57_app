@@ -14,7 +14,26 @@ UI/UX приложения разработан в Figma и затем реал�
 **[Открыть полный проект в Figma](https://www.figma.com/design/9cE8OJQvicM0aQa0TOdDtc/57-%D0%B3%D1%80%D0%B0%D0%BD%D0%B5%D0%B9-%C2%B7-%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BA%D0%BB%D0%B8%D0%BD%D0%B8%D0%BA%D0%B8-%C2%B7-UI-UX?node-id=4-2&t=C4JsUOVCfrjfGEgT-1)**
 
 Дизайн включает отдельные пользовательские потоки для пациента, врача и администратора, а также библиотеку компонентов и состояния интерфейса.
+## Превью приложения
 
+Скриншоты актуальной Flutter-реализации, запущенной на реальном iPhone.
+
+<p align="center">
+  <img src="docs/screenshots/patient_booking_service.png" width="30%" alt="Выбор услуги">
+  <img src="docs/screenshots/patient_booking_datetime.png" width="30%" alt="Выбор даты и времени">
+  <img src="docs/screenshots/patient_clinics.png" width="30%" alt="Клиники и карта">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/doctor_schedule.png" width="30%" alt="Кабинет врача">
+  <img src="docs/screenshots/admin_doctor_profile.png" width="30%" alt="Администрирование врача">
+</p>
+
+<p align="center">
+  <sub>
+    Patient booking · Clinics · Doctor Cabinet · Administrator
+  </sub>
+</p>
 ## Возможности
 
 ### Пациент
