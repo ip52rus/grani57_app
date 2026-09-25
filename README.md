@@ -1,5 +1,22 @@
 # 57 ГРАНЕЙ
 
+<p>
+  <img src="https://img.shields.io/badge/Flutter-02569B?style=flat&logo=flutter&logoColor=white" alt="Flutter">
+  <img src="https://img.shields.io/badge/Dart-0175C2?style=flat&logo=dart&logoColor=white" alt="Dart">
+  <img src="https://img.shields.io/badge/iOS-000000?style=flat&logo=apple&logoColor=white" alt="iOS">
+  <img src="https://img.shields.io/badge/Android-3DDC84?style=flat&logo=android&logoColor=white" alt="Android">
+  <img src="https://img.shields.io/badge/Figma-F24E1E?style=flat&logo=figma&logoColor=white" alt="Figma">
+  <img src="https://img.shields.io/badge/Yandex_MapKit-FF0000?style=flat&logo=yandex&logoColor=white" alt="Yandex MapKit">
+</p>
+
+<p>
+  <img src="https://img.shields.io/badge/PyCharm-000000?style=flat&logo=pycharm&logoColor=white" alt="PyCharm">
+  <img src="https://img.shields.io/badge/Xcode-147EFB?style=flat&logo=xcode&logoColor=white" alt="Xcode">
+  <img src="https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white" alt="Git">
+  <img src="https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white" alt="GitHub">
+  <img src="https://img.shields.io/badge/OpenAI_Codex-412991?style=flat&logo=openai&logoColor=white" alt="OpenAI Codex">
+</p>
+
 Мобильное приложение для сети стоматологических клиник **«57 ГРАНЕЙ»**, разработанное на Flutter для iOS и Android.
 
 Проект объединяет три пользовательских сценария в одном приложении: кабинет пациента, кабинет врача и административную часть.
@@ -176,8 +193,6 @@ flutter test
 Приложение тестируется как на iOS, так и на Android, включая реальные мобильные устройства.
 
 ## Roadmap
-
-С## Roadmap
 
 Разработка продолжается: после завершения и стабилизации Patient / Doctor / Admin demo следующим крупным этапом станет backend и интеграция с реальными данными клиники.
 
