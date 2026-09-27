@@ -8,26 +8,26 @@
   "admin_home": {
     "width": 393,
     "height": 852,
-    "changedPixels": 209920,
-    "changedPercentage": 62.69337825084519
+    "changedPixels": 189435,
+    "changedPercentage": 56.575457836074975
   },
   "admin_publications": {
     "width": 393,
     "height": 852,
-    "changedPixels": 183423,
-    "changedPercentage": 54.77995197648998
+    "changedPixels": 188791,
+    "changedPercentage": 56.38312487307219
   },
   "admin_publication_new": {
     "width": 393,
     "height": 852,
-    "changedPixels": 210495,
-    "changedPercentage": 62.8651041106691
+    "changedPixels": 206875,
+    "changedPercentage": 61.783977827951595
   },
   "admin_publication_edit": {
     "width": 393,
     "height": 852,
-    "changedPixels": 264313,
-    "changedPercentage": 78.93804728284891
+    "changedPixels": 262210,
+    "changedPercentage": 78.30997861639729
   },
   "admin_publication_delete": {
     "width": 393,
@@ -38,20 +38,20 @@
   "admin_doctors": {
     "width": 393,
     "height": 852,
-    "changedPixels": 191626,
-    "changedPercentage": 57.2298080254214
+    "changedPixels": 189019,
+    "changedPercentage": 56.451217909663235
   },
   "admin_doctor_new": {
     "width": 393,
     "height": 852,
-    "changedPixels": 214536,
-    "changedPercentage": 64.07196358814464
+    "changedPixels": 218905,
+    "changedPercentage": 65.37678146913713
   },
   "admin_doctor_edit": {
     "width": 393,
     "height": 852,
-    "changedPixels": 249864,
-    "changedPercentage": 74.6228004157259
+    "changedPixels": 243773,
+    "changedPercentage": 72.80370091626946
   },
   "admin_doctor_delete": {
     "width": 393,
@@ -62,13 +62,13 @@
   "admin_doctor_access_create": {
     "width": 393,
     "height": 852,
-    "changedPixels": 292844,
-    "changedPercentage": 87.4589351204769
+    "changedPixels": 281440,
+    "changedPercentage": 84.05308867624747
   },
   "admin_doctor_access_existing": {
     "width": 393,
     "height": 852,
-    "changedPixels": 268178,
-    "changedPercentage": 80.09234371453488
+    "changedPixels": 256917,
+    "changedPercentage": 76.7292047450095
   }
 }

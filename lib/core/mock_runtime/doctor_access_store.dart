@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../mock_data/demo_admin_models.dart';
@@ -17,10 +18,16 @@ class DoctorAccessStore extends ChangeNotifier {
 
   Future<void> initialize() async {
     if (_initialized) return;
-    final raw = (await _preferences()).getString(_storageKey);
-    _access
-      ..clear()
-      ..addAll(_decode(raw));
+    try {
+      final raw = (await _preferences()).getString(_storageKey);
+      _access
+        ..clear()
+        ..addAll(_decode(raw));
+    } on MissingPluginException {
+      _access
+        ..clear()
+        ..addAll(seedAccess);
+    }
     _initialized = true;
   }
 

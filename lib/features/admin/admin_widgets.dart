@@ -76,7 +76,7 @@ class AdminScreenHeader extends StatelessWidget {
               style: AppTypography.label.copyWith(color: AppColors.brand),
             ),
           ),
-          if (trailing case final value?) value,
+          ?trailing,
         ],
       ),
     ),
@@ -128,16 +128,14 @@ class AdminBottomNavigation extends StatelessWidget {
           key: const ValueKey('admin.nav.home'),
           label: 'Главная',
           activeAsset: 'assets/icons/navigation/nav_home_active_clean.svg',
-          inactiveAsset:
-              'assets/icons/navigation/nav_home_inactive_clean.svg',
+          inactiveAsset: 'assets/icons/navigation/nav_home_inactive_clean.svg',
           selected: index == 0,
           onTap: () => onChanged(0),
         ),
         _AdminNavItem(
           key: const ValueKey('admin.nav.publications'),
           label: 'Публикации',
-          activeAsset:
-              'assets/icons/navigation/nav_documents_active_clean.svg',
+          activeAsset: 'assets/icons/navigation/nav_documents_active_clean.svg',
           inactiveAsset:
               'assets/icons/navigation/nav_documents_inactive_clean.svg',
           selected: index == 1,
@@ -218,6 +216,7 @@ class AdminFormField extends StatelessWidget {
     this.hint,
     this.helper,
     this.maxLines = 1,
+    this.inputHeight,
     this.obscureText = false,
     this.onChanged,
   });
@@ -227,6 +226,7 @@ class AdminFormField extends StatelessWidget {
   final String? hint;
   final String? helper;
   final int maxLines;
+  final double? inputHeight;
   final bool obscureText;
   final ValueChanged<String>? onChanged;
 
@@ -239,26 +239,29 @@ class AdminFormField extends StatelessWidget {
         style: AppTypography.caption.copyWith(color: AppColors.secondary),
       ),
       const SizedBox(height: 8),
-      TextField(
-        key: key,
-        controller: controller,
-        maxLines: obscureText ? 1 : maxLines,
-        obscureText: obscureText,
-        enableSuggestions: false,
-        autocorrect: false,
-        enableInteractiveSelection: false,
-        magnifierConfiguration: TextMagnifierConfiguration.disabled,
-        onChanged: onChanged,
-        style: AppTypography.small.copyWith(color: AppColors.text),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: AppTypography.small.copyWith(color: AppColors.secondary),
-          filled: true,
-          fillColor: AppColors.surface,
-          contentPadding: const EdgeInsets.all(14),
-          border: _border(AppColors.border),
-          enabledBorder: _border(AppColors.border),
-          focusedBorder: _border(AppColors.brand, width: 1.5),
+      SizedBox(
+        height: inputHeight ?? (maxLines == 1 ? 68 : 102),
+        child: TextField(
+          key: key,
+          controller: controller,
+          maxLines: obscureText ? 1 : maxLines,
+          obscureText: obscureText,
+          enableSuggestions: false,
+          autocorrect: false,
+          enableInteractiveSelection: false,
+          magnifierConfiguration: TextMagnifierConfiguration.disabled,
+          onChanged: onChanged,
+          style: AppTypography.small.copyWith(color: AppColors.text),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: AppTypography.small.copyWith(color: AppColors.secondary),
+            filled: true,
+            fillColor: AppColors.surface,
+            contentPadding: const EdgeInsets.all(14),
+            border: _border(AppColors.border),
+            enabledBorder: _border(AppColors.border),
+            focusedBorder: _border(AppColors.brand, width: 1.5),
+          ),
         ),
       ),
       if (helper != null) ...[

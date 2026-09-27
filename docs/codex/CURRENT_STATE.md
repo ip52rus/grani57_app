@@ -1,77 +1,54 @@
 # Текущее состояние
 
-Снимок: 2026-09-25. Branch `main`.
+Снимок: 2026-09-27. Branch `main`.
 
-Актуальные контрольные commits:
+## Patient demo
 
-- `ff2fc24 chore: optimize Codex project context`
-- `1dcdd12 wip: checkpoint current demo development`
-- `d1efd9e docs: improve portfolio README`
+- Splash, восстановление сессии и role-based startup routing.
+- Вход пациента, согласие, SMS, регистрация и локальная demo session.
+- Общий shell: Главная, Приёмы, Документы, Клиники и Профиль.
+- Запись на приём: клиника, услуга или врач, дата и время, подтверждение и
+  состояния результата.
+- Приёмы: предстоящие, пустое состояние, история, детали, отмена и перенос.
+- Новости, документы, профиль и уведомления с локальными demo-состояниями.
+- Yandex MapKit для клиник и fallback внешнего маршрута.
 
-## Реализовано в patient demo
+## Doctor demo
 
-- Splash, restoreSession и role-based startup routing.
-- Login, consent, SMS, регистрация нового пациента и локальная demo session.
-- Общий patient shell с Home, Приёмы, Документы, Клиники и Профиль.
-- Несколько состояний Home, news carousel и detail screens.
-- Booking flow: клиника, услуга/врач, календарь/время, подтверждение и результаты.
-- Приёмы: upcoming/empty/history, детали, отмена, перенос и success.
-- Клиники: Yandex MapKit, точки клиник и external route provider fallback.
-- Документы: список заключений, detail и локальная PDF preview/download.
-- Профиль текущего пациента и выход.
-- Уведомления: inbox/empty, permission education, settings и deep links.
-- Общая адаптивная навигация, back swipe, numeric keypad и design system.
-
-## Реализовано в doctor demo
-
-- Вход врача из общей точки «Вход для сотрудников».
-- Role-based employee authentication.
-- Сохранение и восстановление doctor session.
-- Персональное расписание врача.
-- Календарь и выбор даты.
-- Список записей.
-- Model-driven карточка записи пациента.
-- Empty-day state.
-- Demo doctor access связан со стабильным `doctorId`.
+- Общая точка входа для сотрудников с определением роли по учётным данным.
+- Восстановление doctor session и персональное расписание по стабильному
+  `doctorId`.
+- Календарь, список записей, пустой день и карточка записи пациента.
+- Доступ врача использует тот же источник учётных данных, что и Admin.
 
 ## Administrator demo
 
-Реализуется отдельный administrator flow.
-
-Текущая структура включает:
-
-- общий employee login с role-based routing;
-- admin shell;
-- список врачей;
-- управление данными врачей;
-- управление доступом врача в приложение;
-- demo login/password для врача;
-- включение и отключение доступа;
-- публикации и связанные CRUD-состояния.
-
-Admin flow ещё требует завершения, visual QA и проверки связанных состояний.
+- `admin57 / Grani57Demo!` открывает отдельный Admin shell.
+- Главная админки с актуальными локальными счётчиками, навигацией и выходом.
+- Публикации: фильтрация, создание, редактирование и удаление.
+- Врачи: поиск, создание, редактирование, услуги и удаление.
+- Доступ врача: создание и изменение логина/пароля, отключение, включение и
+  удаление. Запись доступа связана с врачом через стабильный `doctorId`.
+- Созданные в Admin учётные данные сразу участвуют в общем employee login и
+  открывают расписание соответствующего врача.
+- Все 12 Figma-состояний админки имеют production visual fixtures для viewport
+  `393 × 852`.
 
 ## Demo runtime
 
-В текущей версии backend отсутствует.
-
-Используются локальные mock/demo данные:
-
-- demo patients;
-- doctor;
-- administrator;
-- расписание;
-- записи;
-- локальные session state;
-- doctor access configuration.
-
-Demo credentials не являются production credentials.
+Backend пока отсутствует. Пациенты, публикации, врачи, расписание, записи,
+сессии и настройки доступа используют локальные mock-данные и
+`SharedPreferences`. Demo credentials не являются production credentials.
 
 ## Карты
 
-Используется Yandex MapKit.
+Используется Yandex MapKit. API key передаётся через `MAPKIT_API_KEY` и не
+хранится в документации или исходниках.
 
-API key передаётся через:
+## Проверка
 
-```text
-MAPKIT_API_KEY
+- Точечные тесты Admin и Doctor Cabinet покрывают role routing, CRUD,
+  persistence, жизненный цикл доступа врача, привязку по `doctorId`, фильтрацию
+  расписания и выход.
+- `flutter analyze`: без замечаний.
+- `flutter test`: 156 тестов, все прошли.

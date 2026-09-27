@@ -718,9 +718,8 @@ void main() {
     expect(find.text('Анна Смирнова'), findsOneWidget);
   });
 
-  testWidgets('admin session routes to administrator shell placeholder', (
-    tester,
-  ) async {
+  testWidgets('admin session routes to administrator shell', (tester) async {
+    SharedPreferences.setMockInitialValues({});
     await _pumpStartupWithSession(
       tester,
       const DemoSession.authenticated(
@@ -729,7 +728,8 @@ void main() {
       ),
     );
 
-    expect(find.text('Administrator shell'), findsOneWidget);
+    expect(find.text('АДМИНКА'), findsOneWidget);
+    expect(find.text('Управление'), findsOneWidget);
   });
 
   testWidgets('invalid session routes to patient auth fallback', (

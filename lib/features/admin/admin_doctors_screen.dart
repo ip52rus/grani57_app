@@ -49,7 +49,7 @@ class _AdminDoctorsScreenState extends State<AdminDoctorsScreen> {
           Expanded(
             child: SingleChildScrollView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -369,7 +369,7 @@ class _AdminDoctorFormScreenState extends State<AdminDoctorFormScreen> {
                   child: SingleChildScrollView(
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -412,7 +412,7 @@ class _AdminDoctorFormScreenState extends State<AdminDoctorFormScreen> {
                           helper: 'Показывается в списке врачей',
                           controller: _name,
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 0),
                         AdminFormField(
                           label: 'Описание для пациентов',
                           hint:
@@ -559,9 +559,7 @@ class _AccessEntryCard extends StatelessWidget {
                 ),
                 Text(
                   '›',
-                  style: AppTypography.heading.copyWith(
-                    color: AppColors.brand,
-                  ),
+                  style: AppTypography.heading.copyWith(color: AppColors.brand),
                 ),
               ],
             ),

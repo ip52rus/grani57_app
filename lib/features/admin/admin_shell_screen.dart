@@ -44,7 +44,7 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
     _store = widget.store ?? AdminDemoStore();
     _accessStore = widget.accessStore ?? DoctorAccessStore();
     _sessionStore = widget.sessionStore ?? DemoSessionStore();
-    _tab = widget.initialTab.clamp(0, 2) as int;
+    _tab = widget.initialTab.clamp(0, 2);
     _ready = Future.wait([_store.initialize(), _accessStore.initialize()]);
   }
 
@@ -149,7 +149,7 @@ class _AdminHome extends StatelessWidget {
         ),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -359,9 +359,7 @@ class _AdminHomeLink extends StatelessWidget {
                 ),
                 Text(
                   '›',
-                  style: AppTypography.heading.copyWith(
-                    color: AppColors.brand,
-                  ),
+                  style: AppTypography.heading.copyWith(color: AppColors.brand),
                 ),
               ],
             ),

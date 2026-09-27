@@ -84,6 +84,7 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
             sessionStore: _sessionStore,
             doctorId: session.userId,
             doctorName: session.name,
+            doctorStore: _authService.adminStore,
           ),
           UserRole.administrator => AdminShellScreen(
             store: _authService.adminStore,

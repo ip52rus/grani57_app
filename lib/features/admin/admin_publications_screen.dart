@@ -52,7 +52,7 @@ class _AdminPublicationsScreenState extends State<AdminPublicationsScreen> {
           ),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -397,7 +397,7 @@ class _AdminPublicationFormScreenState
                 child: SingleChildScrollView(
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -427,15 +427,16 @@ class _AdminPublicationFormScreenState
                         helper: 'Главная строка карточки',
                         controller: _title,
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 0),
                       AdminFormField(
                         label: 'Описание',
                         hint: 'Коротко опишите публикацию до 120 символов',
                         helper: 'Показывается под заголовком',
                         maxLines: 3,
+                        inputHeight: 68,
                         controller: _description,
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 0),
                       Text(
                         'Информационный блок',
                         style: AppTypography.heading.copyWith(
@@ -638,7 +639,12 @@ class _ImagePickerDemoState extends State<_ImagePickerDemo> {
               : Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.add, size: 36, color: AppColors.brand),
+                    Text(
+                      '+',
+                      style: AppTypography.title.copyWith(
+                        color: AppColors.brand,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       'Добавьте изображение',

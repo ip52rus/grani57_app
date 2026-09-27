@@ -55,3 +55,13 @@
 - Demo publications, doctors and doctor access are persisted with
   `SharedPreferences`; the backend boundary remains replaceable.
 
+## Validation
+
+- All 12 states render from production widgets at `393 × 852` through
+  `test/goldens/admin/admin_render_test.dart`.
+- Local reference, Flutter render, overlay and diff files use the existing
+  `docs/visual_tests/admin/` workflow. Pixel metrics remain diagnostic; device
+  QA is the visual approval gate.
+- `test/admin_module_test.dart` covers role routing, persistence, CRUD,
+  doctor-access lifecycle, stable doctor linkage, schedule filtering and
+  logout.

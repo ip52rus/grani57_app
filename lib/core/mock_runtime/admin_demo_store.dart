@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../mock_data/demo_admin_models.dart';
@@ -22,13 +23,22 @@ class AdminDemoStore extends ChangeNotifier {
 
   Future<void> initialize() async {
     if (_initialized) return;
-    final prefs = await _preferences();
-    _publications
-      ..clear()
-      ..addAll(_decodePublications(prefs.getString(_publicationsKey)));
-    _doctors
-      ..clear()
-      ..addAll(_decodeDoctors(prefs.getString(_doctorsKey)));
+    try {
+      final prefs = await _preferences();
+      _publications
+        ..clear()
+        ..addAll(_decodePublications(prefs.getString(_publicationsKey)));
+      _doctors
+        ..clear()
+        ..addAll(_decodeDoctors(prefs.getString(_doctorsKey)));
+    } on MissingPluginException {
+      _publications
+        ..clear()
+        ..addAll(seedPublications);
+      _doctors
+        ..clear()
+        ..addAll(seedDoctors);
+    }
     _initialized = true;
   }
 

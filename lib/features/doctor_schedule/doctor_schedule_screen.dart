@@ -5,9 +5,11 @@ import '../../core/design_system/components/app_button.dart';
 import '../../core/design_system/tokens/app_colors.dart';
 import '../../core/design_system/tokens/app_radii.dart';
 import '../../core/design_system/typography/app_typography.dart';
+import '../../core/mock_runtime/admin_demo_store.dart';
 import '../../core/mock_runtime/demo_session_store.dart';
 import '../../core/navigation/app_page_route.dart';
 import '../../mock_data/demo_appointment.dart';
+import '../../mock_data/demo_admin_models.dart';
 import '../../mock_data/demo_asset_paths.dart';
 import '../../mock_data/demo_employees.dart';
 import '../../mock_data/demo_schedule.dart';
@@ -23,6 +25,7 @@ class DoctorScheduleScreen extends StatefulWidget {
     this.onRefresh,
     this.doctorId,
     this.doctorName,
+    this.doctorStore,
   });
 
   final DemoSessionStore? sessionStore;
@@ -30,6 +33,7 @@ class DoctorScheduleScreen extends StatefulWidget {
   final VoidCallback? onRefresh;
   final String? doctorId;
   final String? doctorName;
+  final AdminDemoStore? doctorStore;
 
   @override
   State<DoctorScheduleScreen> createState() => _DoctorScheduleScreenState();
@@ -40,6 +44,7 @@ class _DoctorScheduleScreenState extends State<DoctorScheduleScreen> {
   late DateTime _selectedDate;
   late DateTime _displayedMonth;
   String _updatedAt = '09:41';
+  DemoDoctorProfile? _doctorProfile;
 
   @override
   void initState() {
@@ -47,6 +52,7 @@ class _DoctorScheduleScreenState extends State<DoctorScheduleScreen> {
     _sessionStore = widget.sessionStore ?? DemoSessionStore();
     _selectedDate = widget.initialDate ?? DemoSchedule.selectedWorkday;
     _displayedMonth = DateTime(_selectedDate.year, _selectedDate.month);
+    _loadDoctorProfile();
   }
 
   @override
@@ -75,14 +81,16 @@ class _DoctorScheduleScreenState extends State<DoctorScheduleScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.doctorName ?? DemoEmployees.doctor.name,
+                        widget.doctorName ??
+                            _doctorProfile?.name ??
+                            DemoEmployees.doctor.name,
                         style: AppTypography.title.copyWith(
                           color: AppColors.brand,
                         ),
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        'Стоматолог-терапевт',
+                        _doctorSpecialty,
                         style: AppTypography.small.copyWith(
                           color: AppColors.secondary,
                         ),
@@ -162,6 +170,24 @@ class _DoctorScheduleScreenState extends State<DoctorScheduleScreen> {
   }
 
   void _selectDate(DateTime date) => setState(() => _selectedDate = date);
+
+  String get _doctorSpecialty {
+    final description = _doctorProfile?.description;
+    if (description == null || description.isEmpty) {
+      return 'Стоматолог-терапевт';
+    }
+    return description.split('·').first.trim();
+  }
+
+  Future<void> _loadDoctorProfile() async {
+    final store = widget.doctorStore ?? AdminDemoStore();
+    await store.initialize();
+    final profile = store.doctorById(
+      widget.doctorId ?? DemoEmployees.doctor.id,
+    );
+    if (!mounted) return;
+    setState(() => _doctorProfile = profile);
+  }
 
   Future<void> _openAppointment(DemoAppointment appointment) async {
     await Navigator.of(context).push<void>(
