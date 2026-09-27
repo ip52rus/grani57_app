@@ -1,0 +1,6 @@
+[allowlist]
+description = "Public Figma design identifiers documented as file keys"
+regexTarget = "line"
+regexes = [
+  '''Figma file key:\s*`[A-Za-z0-9]+`''',
+]
