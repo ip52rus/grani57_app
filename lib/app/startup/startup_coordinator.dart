@@ -80,9 +80,9 @@ class _StartupCoordinatorState extends State<StartupCoordinator> {
     try {
       final restoreSession = widget.restoreSession;
       if (restoreSession != null) {
-        return restoreSession();
+        return await restoreSession();
       }
-      return _sessionStore.restoreSession();
+      return await _sessionStore.restoreSession();
     } catch (_) {
       await _sessionStore.clearSession();
       return const DemoSession.unauthenticated();
