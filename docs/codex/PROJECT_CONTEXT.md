@@ -9,8 +9,8 @@ Android с тремя пользовательскими контурами:
 - Doctor;
 - Administrator.
 
-Patient и Doctor flows в основном реализованы. Administrator flow находится
-в активной разработке и требует завершения и финальной проверки.
+Patient, Doctor и Administrator flows реализованы как связанная интерактивная
+demo-версия. Следующий этап — device QA и подготовка backend-интеграции.
 
 При конфликте источников применять такой порядок:
 
@@ -118,9 +118,7 @@ Patient и Doctor flows в основном реализованы. Administrato
 
 ## Administrator demo
 
-Administrator flow находится в активной разработке.
-
-Текущая реализация включает:
+Реализованы:
 
 - role-based переход из employee login;
 - admin shell;
@@ -128,12 +126,14 @@ Administrator flow находится в активной разработке.
 - управление доступом врачей в приложение;
 - создание и изменение demo credentials;
 - enable / disable doctor access;
-- publications management.
+- publications management с create/edit/delete и фильтрацией;
+- локальное сохранение через `SharedPreferences`;
+- visual fixtures для всех 12 состояний Admin.
 
 Doctor access хранится отдельно от отображаемых данных врача и связан с
 врачом через стабильный `doctorId`.
 
-Admin flow ещё требует завершения, visual QA и device QA.
+Остаётся финальная проверка Admin flow на реальных iOS и Android устройствах.
 
 ## Demo runtime и authentication
 

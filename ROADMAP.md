@@ -48,8 +48,8 @@
 - [x] Demo credentials
 - [x] Включение и отключение доступа
 - [x] Publications management
-- [ ] Завершение оставшихся состояний Admin flow
-- [ ] Visual QA
+- [x] Все состояния Admin flow
+- [x] Automated visual fixtures
 - [ ] Device QA
 
 ## Demo Stabilization

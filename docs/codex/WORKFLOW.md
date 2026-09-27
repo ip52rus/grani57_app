@@ -5,7 +5,8 @@
 1. Выполнить `git status --short`.
 2. Найти flow в `SCREEN_INDEX.md` и открыть только связанные source/spec/test.
 3. Отделить существующие dirty changes от требуемых изменений.
-4. Не запускать destructive Git commands и не делать commit.
+4. Не запускать destructive Git commands. Commit делать после завершения и
+   проверки связанного flow.
 
 ## 2. Figma → локальный spec
 
@@ -76,4 +77,8 @@ flutter test
 4. Обновить `CURRENT_STATE.md` и `SCREEN_INDEX.md`, если статус изменился.
 5. Отчёт: что изменено, что проверено, оставшиеся различия/ограничения,
    `git status --short`.
-6. Commit допускается только после прямого запроса владельца.
+6. Проверить staged diff на secrets, персональные данные и случайные generated
+   файлы.
+7. Создать отдельный содержательный commit с GitHub noreply identity и
+   отправить его в `origin`, если владелец явно не попросил оставить изменения
+   локально.

@@ -10,6 +10,11 @@
 </p>
 
 <p>
+  <a href="https://github.com/ip52rus/grani57_app/actions/workflows/flutter-quality.yml"><img src="https://github.com/ip52rus/grani57_app/actions/workflows/flutter-quality.yml/badge.svg" alt="Flutter quality"></a>
+  <a href="https://github.com/ip52rus/grani57_app/actions/workflows/secret-scan.yml"><img src="https://github.com/ip52rus/grani57_app/actions/workflows/secret-scan.yml/badge.svg" alt="Secret scan"></a>
+</p>
+
+<p>
   <img src="https://img.shields.io/badge/PyCharm-000000?style=flat&logo=pycharm&logoColor=white" alt="PyCharm">
   <img src="https://img.shields.io/badge/Xcode-147EFB?style=flat&logo=xcode&logoColor=white" alt="Xcode">
   <img src="https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white" alt="Git">
@@ -181,6 +186,19 @@ flutter test
 ```
 
 Также в проекте используются локальные визуальные reference-файлы и инструменты сравнения интерфейса с макетами Figma.
+
+Каждый push и pull request автоматически запускает `flutter analyze`, все
+поведенческие тесты и отдельную проверку истории на случайно добавленные
+secrets. Platform-sensitive golden-тесты запускаются локально на macOS.
+
+## Безопасность и приватность
+
+- Репозиторий содержит только придуманные demo-данные.
+- Реальные API-ключи, медицинские данные и личные контакты не должны попадать в
+  исходники, документацию, логи или Git-историю.
+- Локальные ключи передаются через `.mapkit.env`, который исключён из Git.
+- Для commit используется GitHub noreply identity.
+- Правила сообщения об уязвимостях описаны в [`SECURITY.md`](SECURITY.md).
 
 ## Статус проекта
 
