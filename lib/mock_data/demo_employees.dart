@@ -18,8 +18,8 @@ abstract final class DemoEmployees {
     id: 'admin_001',
     name: 'Администратор 57 ГРАНЕЙ',
     role: UserRole.administrator,
-    login: 'admin57',
-    password: 'Grani57Demo!',
+    login: 'admin',
+    password: 'admin',
   );
 
   static const values = <DemoEmployee>[doctor, administrator];

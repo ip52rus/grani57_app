@@ -43,8 +43,8 @@ void main() {
       );
       expect(
         (await auth.authenticateEmployee(
-          login: 'admin57',
-          password: 'Grani57Demo!',
+          login: 'admin',
+          password: 'admin',
         ))?.role,
         UserRole.administrator,
       );

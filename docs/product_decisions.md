@@ -86,9 +86,9 @@ Approved for Demo v0.1 on 2026-09-11.
   - password: `Doctor57!`
 - Administrator:
   - id: `admin_001`
-  - login: `admin57`
+  - login: `admin`
   - role: `administrator`
-  - password: `Grani57Demo!`
+  - password: `admin`
 
 These credentials are strictly local Demo fixtures. Production authentication
 must not use open-text passwords or this validation model.

@@ -37,7 +37,7 @@
 ## Content and behavior
 
 - The common employee login resolves the destination from the authenticated
-  role. `admin57 / Grani57Demo!` opens Admin; doctor credentials open the
+  role. `admin / admin` opens Admin; doctor credentials open the
   linked doctor's schedule. No role selector is shown.
 - Admin home links to Publications and Doctors and shows counts from the local
   store. Bottom navigation provides the same three destinations.

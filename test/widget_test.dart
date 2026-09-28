@@ -1238,8 +1238,8 @@ void main() {
     final auth = DemoAuthService();
 
     final session = await auth.authenticateEmployee(
-      login: 'admin57',
-      password: 'Grani57Demo!',
+      login: 'admin',
+      password: 'admin',
     );
 
     expect(session?.userId, 'admin_001');
@@ -1251,7 +1251,7 @@ void main() {
     final auth = DemoAuthService();
 
     final session = await auth.authenticateEmployee(
-      login: 'admin57',
+      login: 'admin',
       password: 'wrong-password',
     );
 

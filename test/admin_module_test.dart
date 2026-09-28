@@ -24,8 +24,8 @@ void main() {
 
   test('admin fixture authenticates as administrator', () async {
     final session = await DemoAuthService().authenticateEmployee(
-      login: 'admin57',
-      password: 'Grani57Demo!',
+      login: 'admin',
+      password: 'admin',
     );
 
     expect(session?.userId, 'admin_001');
@@ -35,7 +35,7 @@ void main() {
   test('invalid admin credentials do not create a session', () async {
     expect(
       await DemoAuthService().authenticateEmployee(
-        login: 'admin57',
+        login: 'admin',
         password: 'wrong',
       ),
       isNull,
@@ -80,8 +80,8 @@ void main() {
       ),
     );
 
-    await tester.enterText(find.byType(TextField).first, 'admin57');
-    await tester.enterText(find.byType(TextField).last, 'Grani57Demo!');
+    await tester.enterText(find.byType(TextField).first, 'admin');
+    await tester.enterText(find.byType(TextField).last, 'admin');
     await tester.tap(find.byKey(const ValueKey('doctor.login.submit')));
     await tester.pumpAndSettle();
 
